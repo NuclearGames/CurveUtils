@@ -10,19 +10,29 @@ namespace BezierCurveLib {
         
         public List<Vector2> Points = new List<Vector2>();
 
+        private List<Vector2> _curve = new List<Vector2>();
+
+        public Bezier(List<Vector2> points) {
+            Points = points;
+        }
+
         #region Calculation
 
-        public List<Vector2> GetBezierCurve(List<Vector2> points, float step) {
+        public List<Vector2> GetBezierCurve(float step) {
+
+            if(Points.Count == 0) {
+                return new List<Vector2>();
+            }
 
             List<Vector2> result = new List<Vector2>();
 
-            Points = points;
+            _curve.AddRange(Points);
 
             for (float t = 0; t < 1; t += step) {
-                result.Add(GetPoint(points.Count - 1, t));
+                result.Add(GetPoint(_curve.Count - 1, t));
             }
 
-            Points = result;
+            _curve.Clear();
 
             return result;
         }
@@ -48,12 +58,12 @@ namespace BezierCurveLib {
         private Vector2 GetPoint(int uBound, float t) {
 
             if (uBound == 0) {
-                return Points[0];
+                return _curve[0];
             }
 
             for (int i = 0; i < uBound; i++) {
-                Vector2 q = Vector2.Lerp(Points[i], Points[i + 1], t);
-                Points[i] = q;
+                Vector2 q = Vector2.Lerp(_curve[i], _curve[i + 1], t);
+                _curve[i] = q;
             }
 
             return GetPoint(uBound - 1, t);

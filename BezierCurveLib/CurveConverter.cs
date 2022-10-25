@@ -14,7 +14,6 @@ namespace BezierCurveLib {
 
             WriteIndented = true,
             Converters = { new Vector2Converter() }
-
         };
 
 
@@ -32,12 +31,9 @@ namespace BezierCurveLib {
         public static async Task<Bezier> Deserialize() {
 
             FileStream fileStream = new FileStream(@"Curve.json", FileMode.OpenOrCreate);
-            Bezier curve = new Bezier();
-            var points = await JsonSerializer.DeserializeAsync<List<Vector2>>(fileStream, options);
 
-            if(points != null) {
-                curve.Points = points;
-            }
+            List<Vector2>? points = await JsonSerializer.DeserializeAsync<List<Vector2>>(fileStream, options);
+            Bezier curve = new Bezier(points);
 
             fileStream.Close();
             return curve;

@@ -12,24 +12,23 @@ namespace CurveBuilder {
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window {
+
+        private Bezier? _Curve;
         
-        private List<Vector2> _points = new List<Vector2>();
+        private List<Vector2> _newPoints = new List<Vector2>();
         private List<Vector2> curvePoints = new List<Vector2>();
         private int _cellSize = 10;
 
-        private bool isCurveExist = false;
         private Ellipse? prevPoint;
 
         public MainWindow() {
             InitializeComponent();
             DrawGrid();
         }
-        private List<Vector2> CalculateCurve() {
+        private List<Vector2> CalculateCurve(List<Vector2> points) {
 
-            Bezier curve = new Bezier();
-            curvePoints = curve.GetBezierCurve(_points, 0.001f);
-
-            CurveConverter.Serialize(curve);
+            Bezier curve = new Bezier(points);
+            curvePoints = curve.GetBezierCurve(0.001f);
 
             return curvePoints;
         }
@@ -75,7 +74,6 @@ namespace CurveBuilder {
                 DrawLine(curve[i], curve[i + 1], Brushes.Red);
             }
 
-            isCurveExist = true;
         }
 
         #region Grid
@@ -119,12 +117,12 @@ namespace CurveBuilder {
             Vector2 point = MousePositionNormalize(e.GetPosition(CanvasXY));
 
             DrawPoint(point, Brushes.Black);
-            _points.Add(point);
+            _newPoints.Add(point);
         }
 
         private void DrawCurve_Click(object sender, RoutedEventArgs e) {
-
-            DrawCurve(CalculateCurve());
+            _Curve = new Bezier(_newPoints);
+            DrawCurve(CalculateCurve(_Curve.Points));
 
         }
 
@@ -135,11 +133,15 @@ namespace CurveBuilder {
             labelX.Content = "X: " + point.X;
             labelY.Content = "Y: " + (CanvasXY.Height - point.Y);
 
-            if (!isCurveExist) {
+            if (_Curve == null) {
                 return;
             }
 
-            float Y = new Bezier().GetY(point.X, curvePoints);
+            if(_Curve.Points.Count <= 1) {
+                return;
+            }
+
+            float Y = _Curve.GetY(point.X, curvePoints);
 
             LabelOutputY.Content = "OutputY: " + (CanvasXY.Height - Y);
 
@@ -152,7 +154,7 @@ namespace CurveBuilder {
 
             Vector2 point = MousePositionNormalize(e.GetPosition(CanvasXY));
 
-            _points.Remove(new Vector2((float)point.X, (float)point.Y));
+            _newPoints.Remove(new Vector2((float)point.X, (float)point.Y));
             HitTestResult result = VisualTreeHelper.HitTest(CanvasXY, new System.Windows.Point(point.X, point.Y));
 
             if(result == null) {
@@ -164,10 +166,9 @@ namespace CurveBuilder {
         private void ClearGrid_Click(object sender, RoutedEventArgs e) {
 
             CanvasXY.Children.Clear();
-            _points.Clear();
+            _newPoints.Clear();
             DrawGrid();
-
-            isCurveExist = false;   
+  
         }
 
         private Vector2 MousePositionNormalize(System.Windows.Point point) {
@@ -181,8 +182,16 @@ namespace CurveBuilder {
         private async void Deserialize_Click(object sender, RoutedEventArgs e) {
 
             Bezier curve = await CurveConverter.Deserialize();
-            DrawCurve(curve.Points);
+            foreach (var point in curve.Points) {
+                DrawPoint(point, Brushes.Black);
+            }
+            DrawCurve(CalculateCurve(curve.Points));
 
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e) {
+            Bezier curve = new Bezier(_newPoints);
+            CurveConverter.Serialize(curve);
         }
     }
     #endregion
