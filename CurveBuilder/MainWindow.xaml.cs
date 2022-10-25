@@ -1,25 +1,11 @@
 ﻿using BezierCurveLib;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Numerics;
-using System.Drawing;
-using System.Reflection.Metadata.Ecma335;
-using System.Text.Json.Serialization;
-using System.Text.Json;
-using System.Reflection.PortableExecutable;
-using System.Security.Cryptography;
 
 namespace CurveBuilder {
     /// <summary>
@@ -38,6 +24,17 @@ namespace CurveBuilder {
             InitializeComponent();
             DrawGrid();
         }
+        private List<Vector2> CalculateCurve() {
+
+            Bezier curve = new Bezier();
+            curvePoints = curve.GetBezierCurve(_points, 0.001f);
+
+            CurveConverter.Serialize(curve);
+
+            return curvePoints;
+        }
+
+        #region Draw
 
         public Ellipse DrawPoint(Vector2 point, SolidColorBrush color) {
 
@@ -49,55 +46,36 @@ namespace CurveBuilder {
             ellipse.Margin = new Thickness(point.X - 2, point.Y - 2, 0, 0);
 
             CanvasXY.Children.Add(ellipse);
+
             return ellipse;
         }
 
-        private List<Vector2> CalculateCurve() {
+        public Line DrawLine(Vector2 from, Vector2 to, SolidColorBrush color) {
 
-            Bezier curve = new Bezier();
-            curvePoints = curve.GetBezierCurve(_points, 0.001f);
+            Line line = new Line();
 
-            CurveConverter.Serialize(curve);
+            line.StrokeThickness = 4;
+            line.Stroke = color;
 
-            return curvePoints;
+            line.X1 = from.X;
+            line.Y1 = from.Y;
+
+            line.X2 = to.X;
+            line.Y2 = to.Y;
+
+            CanvasXY.Children.Add(line);
+
+            return line;
+
         }
+
         private void DrawCurve(List<Vector2> curve) {
 
-            for (int i = 0; i < curve.Count; i++) {
-                DrawPoint(curve[i], Brushes.Red);
+            for (int i = 0; i < curve.Count - 1; i++) {
+                DrawLine(curve[i], curve[i + 1], Brushes.Red);
             }
 
             isCurveExist = true;
-        }
-
-        private void CanvasXY_MouseDown(object sender, MouseButtonEventArgs e) {
-            Vector2 point = MousePositionNormalize(e.GetPosition(CanvasXY));
-
-            DrawPoint(point, Brushes.Black);
-            _points.Add(point);
-        }
-
-        private void DrawCurve_Click(object sender, RoutedEventArgs e) {
-            DrawCurve(CalculateCurve());
-        }
-
-        private void CanvasXY_MouseMove(object sender, MouseEventArgs e) {
-
-            Vector2 point = MousePositionNormalize(e.GetPosition(CanvasXY));
-
-            labelX.Content = "X: " + point.X;
-            labelY.Content = "Y: " + (CanvasXY.Height - point.Y);
-
-            if (!isCurveExist) {
-                return;
-            }
-
-            float Y = new Bezier().GetYFromBezier(point.X, curvePoints);
-
-            LabelOutputY.Content = "OutputY: " + (CanvasXY.Height - Y);
-
-            CanvasXY.Children.Remove(prevPoint);
-            prevPoint = DrawPoint(new Vector2(point.X, Y), Brushes.Blue);
         }
 
         #region Grid
@@ -133,6 +111,43 @@ namespace CurveBuilder {
         }
         #endregion
 
+        #endregion
+
+        #region Events
+        private void CanvasXY_MouseDown(object sender, MouseButtonEventArgs e) {
+
+            Vector2 point = MousePositionNormalize(e.GetPosition(CanvasXY));
+
+            DrawPoint(point, Brushes.Black);
+            _points.Add(point);
+        }
+
+        private void DrawCurve_Click(object sender, RoutedEventArgs e) {
+
+            DrawCurve(CalculateCurve());
+
+        }
+
+        private void CanvasXY_MouseMove(object sender, MouseEventArgs e) {
+
+            Vector2 point = MousePositionNormalize(e.GetPosition(CanvasXY));
+
+            labelX.Content = "X: " + point.X;
+            labelY.Content = "Y: " + (CanvasXY.Height - point.Y);
+
+            if (!isCurveExist) {
+                return;
+            }
+
+            float Y = new Bezier().GetY(point.X, curvePoints);
+
+            LabelOutputY.Content = "OutputY: " + (CanvasXY.Height - Y);
+
+            CanvasXY.Children.Remove(prevPoint);
+            prevPoint = DrawPoint(new Vector2(point.X, Y), Brushes.Blue);
+        }
+
+
         private void CanvasXY_MouseRightButtonDown(object sender, MouseButtonEventArgs e) {
 
             Vector2 point = MousePositionNormalize(e.GetPosition(CanvasXY));
@@ -147,9 +162,11 @@ namespace CurveBuilder {
             CanvasXY.Children.Remove(result.VisualHit as UIElement);
         }
         private void ClearGrid_Click(object sender, RoutedEventArgs e) {
+
             CanvasXY.Children.Clear();
             _points.Clear();
             DrawGrid();
+
             isCurveExist = false;   
         }
 
@@ -162,10 +179,12 @@ namespace CurveBuilder {
         }
 
         private async void Deserialize_Click(object sender, RoutedEventArgs e) {
+
             Bezier curve = await CurveConverter.Deserialize();
             DrawCurve(curve.Points);
-        }
 
+        }
     }
+    #endregion
 }
 

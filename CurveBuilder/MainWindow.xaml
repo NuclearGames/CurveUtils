@@ -7,12 +7,12 @@
         mc:Ignorable="d"
         Title="CurveBuilder" Height="800" Width="1220">
     <Grid Height="800" HorizontalAlignment="Left" Width="1220" VerticalAlignment="Top">
-        <Canvas x:Name="CanvasXY" Background="Gray" Margin="0,0,0,400" MouseMove="CanvasXY_MouseMove" MouseRightButtonDown="CanvasXY_MouseRightButtonDown" MouseLeftButtonDown="CanvasXY_MouseDown" Height="400" Width="1220"/>
-        <Button Content="DrawCurve and Serialize" HorizontalAlignment="Left" Margin="261,557,0,0" VerticalAlignment="Top" Click="DrawCurve_Click" Height="75" Width="150"/>
-        <Label x:Name="labelX" Content="Label" HorizontalAlignment="Left" Margin="567,405,0,0" VerticalAlignment="Top"/>
-        <Label x:Name="labelY" Content="Label" HorizontalAlignment="Left" Margin="610,405,0,0" VerticalAlignment="Top"/>
-        <Button Content="Clear" HorizontalAlignment="Left" Margin="544,557,0,0" Click="ClearGrid_Click" VerticalAlignment="Top" Height="75" Width="150"/>
-        <Label x:Name="LabelOutputY" Content="Output Y: " HorizontalAlignment="Left" Margin="921,405,0,0" VerticalAlignment="Top"/>
-        <Button Content="Deserialize and DrawCurve" HorizontalAlignment="Left" Click="Deserialize_Click" Margin="811,556,0,0" VerticalAlignment="Top" Width="150" Height="76"/>
+        <Canvas x:Name="CanvasXY" Background="Gray" Margin="0,0,0,256" MouseMove="CanvasXY_MouseMove" MouseRightButtonDown="CanvasXY_MouseRightButtonDown" MouseLeftButtonDown="CanvasXY_MouseDown" Width="1220" Height="540"/>
+        <Button Content="DrawCurve and Serialize" HorizontalAlignment="Left" Margin="261,657,0,0" VerticalAlignment="Top" Click="DrawCurve_Click" Height="75" Width="150"/>
+        <Label x:Name="labelX" Content="Label" HorizontalAlignment="Left" Margin="567,549,0,0" VerticalAlignment="Top"/>
+        <Label x:Name="labelY" Content="Label" HorizontalAlignment="Left" Margin="610,549,0,0" VerticalAlignment="Top"/>
+        <Button Content="Clear" HorizontalAlignment="Left" Margin="544,657,0,0" Click="ClearGrid_Click" VerticalAlignment="Top" Height="75" Width="150"/>
+        <Label x:Name="LabelOutputY" Content="Output Y: " HorizontalAlignment="Left" Margin="921,549,0,0" VerticalAlignment="Top"/>
+        <Button Content="Deserialize and DrawCurve" HorizontalAlignment="Left" Click="Deserialize_Click" Margin="811,656,0,0" VerticalAlignment="Top" Width="150" Height="76"/>
     </Grid>
 </Window>
