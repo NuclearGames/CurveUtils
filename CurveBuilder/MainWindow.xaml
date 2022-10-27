@@ -17,7 +17,7 @@
         <Label Content="ЛКМ - Поставить точку" HorizontalAlignment="Left" Margin="51,562,0,0" VerticalAlignment="Top"/>
         <Label Content="ПКМ по точке - Убрать точку" HorizontalAlignment="Left" Margin="51,593,0,0" VerticalAlignment="Top"/>
         <Label Content="Путь сохраниения кривой: CurveUtils\CurveBuilder\bin\Debug\net6.0-windows\Curve.json" HorizontalAlignment="Left" Margin="10,732,0,0" VerticalAlignment="Top"/>
-        <Button Content="Serialize" HorizontalAlignment="Left" Margin="354,657,0,0" VerticalAlignment="Top" Height="75" Width="150" Click="Button_Click"/>
+        <Button Content="Serialize" HorizontalAlignment="Left" Margin="354,657,0,0" VerticalAlignment="Top" Height="75" Width="150" Click="Serialize_Click"/>
         <CheckBox Content="Автообновление" HorizontalAlignment="Left" Margin="154,637,0,0" VerticalAlignment="Top" Checked="CheckBox_Switcher" Unchecked="CheckBox_Switcher" IsChecked="False"/>
     </Grid>
 </Window>

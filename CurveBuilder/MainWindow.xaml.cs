@@ -40,10 +40,35 @@ namespace CurveBuilder {
         }
 
         private void CurveExistHandler(bool value) {
+
             isExistCurve = value;
+
+        }
+        private void ActiveRedrawing() {
+
+            if (_newPoints.Count >= 3 && isEnableActivateRedrawing) {
+
+                Clear();
+
+                Drawer.DrawPoints(_newPoints, Brushes.Black, CanvasXY);
+                BezierNode bezierNode = new BezierNode();
+
+                bezierNode.Nodes.AddRange(_newPoints);
+
+                _Curve = new Bezier(bezierNode, _accuracy);
+                Drawer.DrawCurve(_Curve.GetBezierCurve(), CanvasXY);
+
+            }
+        }
+        private void Clear() {
+
+            CanvasXY.Children.Clear();
+            Grid.DrawGrid(CanvasXY);
+
         }
 
         #region Events
+
         private void CanvasXY_MouseDown(object sender, MouseButtonEventArgs e) {
 
             Vector2 point = MousePositionNormalize(e.GetPosition(CanvasXY));
@@ -54,19 +79,6 @@ namespace CurveBuilder {
             Drawer.DrawPoint(point, Brushes.Black, CanvasXY);
             _newPoints.Add(point);
             ActiveRedrawing();
-        }
-
-        private void ActiveRedrawing() {
-            if (_newPoints.Count >= 3 && isEnableActivateRedrawing) {
-                Clear();
-                Drawer.DrawPoints(_newPoints, Brushes.Black, CanvasXY);
-                BezierNode bezierNode = new BezierNode();
-
-                bezierNode.Nodes.AddRange(_newPoints);
-
-                _Curve = new Bezier(bezierNode, _accuracy);
-                Drawer.DrawCurve(_Curve.GetBezierCurve(), CanvasXY);
-            }
         }
 
         private void DrawCurve_Click(object sender, RoutedEventArgs e) {
@@ -125,19 +137,17 @@ namespace CurveBuilder {
             }
 
             CanvasXY.Children.Remove(result.VisualHit as UIElement);
+
             ActiveRedrawing();
         }
 
         private void ClearGrid_Click(object sender, RoutedEventArgs e) {
+
             Clear();
             _newPoints.Clear();
 
             CurveExistHandler(false);
   
-        }
-        private void Clear() {
-            CanvasXY.Children.Clear();
-            Grid.DrawGrid(CanvasXY);
         }
 
         private Vector2 MousePositionNormalize(System.Windows.Point point) {
@@ -162,7 +172,7 @@ namespace CurveBuilder {
 
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e) {
+        private void Serialize_Click(object sender, RoutedEventArgs e) {
 
             BezierNode bezierNode = new BezierNode();
             bezierNode.Nodes.AddRange(_newPoints);
@@ -171,10 +181,15 @@ namespace CurveBuilder {
         }
 
         private void CheckBox_Switcher(object sender, RoutedEventArgs e) {
+
             if (isEnableActivateRedrawing) {
+
                 isEnableActivateRedrawing = false;
+
             } else {
+
                 isEnableActivateRedrawing = true;
+
             }
         }
     }
