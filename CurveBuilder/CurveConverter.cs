@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Text.Json;
 using System.Numerics;
 using BezierCurveLib;
+using System.IO;
 
 namespace BezierCurveLib {
     public static class CurveConverter {
@@ -17,26 +18,27 @@ namespace BezierCurveLib {
         };
 
 
-        public static async void Serialize(Bezier curve) {
+        public static async void Serialize(BezierNode curve) {
 
-            File.WriteAllText(@"Curve.json", string.Empty);
-            FileStream fileStream = new FileStream(@"Curve.json", FileMode.OpenOrCreate);
+            FileStream fileStream = new FileStream(@"Curve.json", FileMode.Truncate);
 
-            await JsonSerializer.SerializeAsync(fileStream, curve.Points, options);
+            await JsonSerializer.SerializeAsync(fileStream, curve.Nodes, options);
 
             fileStream.Close();
 
         }
 
-        public static async Task<Bezier> Deserialize() {
+        public static async Task<BezierNode> Deserialize() {
 
-            FileStream fileStream = new FileStream(@"Curve.json", FileMode.OpenOrCreate);
+            FileStream fileStream = new FileStream(@"Curve.json", FileMode.Open);
 
             List<Vector2>? points = await JsonSerializer.DeserializeAsync<List<Vector2>>(fileStream, options);
-            Bezier curve = new Bezier(points);
+
+            BezierNode bezierNode = new BezierNode();
+            bezierNode.Nodes.AddRange(points);
 
             fileStream.Close();
-            return curve;
+            return bezierNode;
 
 
         }

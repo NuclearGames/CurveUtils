@@ -7,46 +7,36 @@ using System.Text.Json.Serialization;
 namespace BezierCurveLib {
 
     public class Bezier {
-        
-        public List<Vector2> Points = new List<Vector2>();
 
         private List<Vector2> _curve = new List<Vector2>();
+        private List<Vector2> _nodes = new List<Vector2>();
 
-        public Bezier(List<Vector2> points) {
-            Points = points;
+        private float accuracy;
+
+        public Bezier(BezierNode nodes, float accuracy) {
+
+            _nodes = nodes.Nodes;
+            this.accuracy = accuracy;
+            CalculateBezierCurve();
+
+        }
+
+        public List<Vector2> GetBezierCurve() {
+            return _curve;
         }
 
         #region Calculation
 
-        public List<Vector2> GetBezierCurve(float step) {
+        public float Evaluate(float x) {
 
-            if(Points.Count == 0) {
-                return new List<Vector2>();
-            }
+            for (int i = 0; i < _curve.Count - 1; i++) {
 
-            List<Vector2> result = new List<Vector2>();
+                if (_curve[i].X <= x && x <= _curve[i + 1].X) {
 
-            _curve.AddRange(Points);
+                    float deltaX = x - _curve[i].X;
+                    float k = ((_curve[i + 1].Y - _curve[i].Y) / (_curve[i + 1].X - _curve[i].X));
 
-            for (float t = 0; t < 1; t += step) {
-                result.Add(GetPoint(_curve.Count - 1, t));
-            }
-
-            _curve.Clear();
-
-            return result;
-        }
-
-        public float GetY(float x, List<Vector2> points) {
-
-            for (int i = 0; i < points.Count-1; i++) {
-
-                if (points[i].X <= x && x <= points[i + 1].X) {
-
-                    float deltaX = x - points[i].X;
-                    float k = ((points[i + 1].Y - points[i].Y) / (points[i + 1].X - points[i].X));
-
-                    return (float)Math.Round(deltaX * k + points[i].Y);
+                    return (float)Math.Round(deltaX * k + _curve[i].Y);
 
                 }
 
@@ -54,6 +44,27 @@ namespace BezierCurveLib {
 
             return 0;
         }
+
+        private List<Vector2> CalculateBezierCurve() {
+
+            if(_nodes.Count == 0) {
+                return new List<Vector2>();
+            }
+
+            List<Vector2> result = new List<Vector2>();
+
+            _curve.AddRange(_nodes);
+
+            for (float t = 0; t < 1; t += accuracy) {
+                result.Add(GetPoint(_curve.Count - 1, t));
+            }
+
+            _curve.Clear();
+            _curve.AddRange(result);
+
+            return _curve;
+        }
+
 
         private Vector2 GetPoint(int uBound, float t) {
 
