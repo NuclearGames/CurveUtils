@@ -1,14 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Text.Json;
-using System.Numerics;
-using BezierCurveLib;
 using System.IO;
+using System.Text.Json;
+using BezierCurveLib;
 
-namespace BezierCurveLib {
+namespace CurveBuilder {
     public static class CurveConverter {
 
         private static JsonSerializerOptions _options = new JsonSerializerOptions {
@@ -18,28 +13,15 @@ namespace BezierCurveLib {
         };
 
 
-        public static async void Serialize(BezierNode curve) {
-
-            FileStream fileStream = new FileStream(@"Curve.json", FileMode.Truncate);
-
-            await JsonSerializer.SerializeAsync(fileStream, curve.Nodes, _options);
-
-            fileStream.Close();
-
+        public static void Serialize(BezierCurveSourceModel curve) {
+            var stringValue = JsonSerializer.Serialize(curve, _options);
+            File.WriteAllText(@"Curve.json", stringValue);
         }
 
-        public static async Task<BezierNode> Deserialize() {
+        public static BezierCurveSourceModel Deserialize() {
+            var stringValue = File.ReadAllText(@"Curve.json");
 
-            FileStream fileStream = new FileStream(@"Curve.json", FileMode.Open);
-
-            List<Vector2>? points = await JsonSerializer.DeserializeAsync<List<Vector2>>(fileStream, _options);
-
-            BezierNode bezierNode = new BezierNode();
-            bezierNode.Nodes.AddRange(points);
-
-            fileStream.Close();
-            return bezierNode;
-
+            return JsonSerializer.Deserialize<BezierCurveSourceModel>(stringValue, _options) ?? throw new NullReferenceException();
 
         }
     }

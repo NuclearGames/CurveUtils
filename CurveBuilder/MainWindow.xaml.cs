@@ -6,20 +6,20 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using System.Numerics;
+using CurveBuilder.Uilts;
 
 namespace CurveBuilder {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window {
-
-        private Bezier? _curve;
+        private const float ACCURACY = 0.001f;
+        private const int CELL_SIZE = 10;
+        
+        private BezierCurve? _curveObject;
         private Ellipse? _prevPoint;
 
         private List<Vector2> _newPoints = new List<Vector2>();
-
-        private readonly float _accuracy = 0.001f;
-        private readonly int _cellSize = 10;
 
         private bool _isExistCurve = false;
         private bool _isEnableActivateRedrawing = false;
@@ -52,12 +52,12 @@ namespace CurveBuilder {
                 Clear();
 
                 Drawer.DrawPoints(_newPoints, Brushes.Black, CanvasXY);
-                BezierNode bezierNode = new BezierNode();
+                BezierCurveSourceModel bezierCurveSourceModel = new BezierCurveSourceModel {
+                    Nodes = new List<Vector2>(_newPoints)
+                };
 
-                bezierNode.Nodes.AddRange(_newPoints);
-
-                _curve = new Bezier(bezierNode, _accuracy);
-                Drawer.DrawCurve(_curve.GetBezierCurve(), CanvasXY);
+                _curveObject = BezierCurveBuilder.Build(bezierCurveSourceModel, ACCURACY);
+                Drawer.DrawCurve(_curveObject.GetBezierCurve(), CanvasXY);
 
             }
         }
@@ -73,7 +73,7 @@ namespace CurveBuilder {
         private void CanvasXY_MouseDown(object sender, MouseButtonEventArgs e) {
 
             Vector2 point = MousePositionNormalize(e.GetPosition(CanvasXY));
-            if(point.Y == float.NaN) {
+            if(point.Y.CompareTo(float.NaN) == 0) {
                 return;
             } 
 
@@ -83,13 +83,13 @@ namespace CurveBuilder {
         }
 
         private void DrawCurve_Click(object sender, RoutedEventArgs e) {
-            
-            BezierNode bezierNode = new BezierNode();
 
-            bezierNode.Nodes.AddRange(_newPoints);
+            BezierCurveSourceModel bezierCurveSourceModel = new BezierCurveSourceModel {
+                Nodes = new List<Vector2>(_newPoints)
+            };
 
-            _curve = new Bezier(bezierNode, _accuracy);
-            Drawer.DrawCurve(_curve.GetBezierCurve(), CanvasXY);
+            _curveObject = BezierCurveBuilder.Build(bezierCurveSourceModel, ACCURACY);
+            Drawer.DrawCurve(_curveObject.GetBezierCurve(), CanvasXY);
 
         }
 
@@ -100,11 +100,11 @@ namespace CurveBuilder {
             labelX.Content = "X: " + point.X;
             labelY.Content = "Y: " + (CanvasXY.Height - point.Y);
 
-            if (_curve == null) {
+            if (_curveObject == null) {
                 return;
             }
 
-            if(_curve.GetBezierCurve().Count <= 1) {
+            if(_curveObject.GetBezierCurve().Count <= 1) {
                 return;
             }
 
@@ -112,17 +112,17 @@ namespace CurveBuilder {
                 return;
             }
 
-            if (point.X > _curve.MaxX()-1 || point.X < _curve.MinX()+1) {
+            if (point.X > _curveObject.MaxX() - ACCURACY || point.X < _curveObject.MinX() + ACCURACY) {
                 return;
             }
 
-            float Y = _curve.Evaluate(point.X);
+            float y = _curveObject.Evaluate(point.X);
             
 
-            LabelOutputY.Content = "OutputY: " + (CanvasXY.Height - Y);
+            LabelOutputY.Content = "OutputY: " + (CanvasXY.Height - y);
 
             CanvasXY.Children.Remove(_prevPoint);
-            _prevPoint = Drawer.DrawPoint(new Vector2(point.X, Y), Brushes.Blue, CanvasXY);
+            _prevPoint = Drawer.DrawPoint(point with { Y = y }, Brushes.Blue, CanvasXY);
         }
 
 
@@ -153,45 +153,36 @@ namespace CurveBuilder {
 
         private Vector2 MousePositionNormalize(System.Windows.Point point) {
 
-            point.X = Math.Round(point.X / _cellSize) * _cellSize;
-            point.Y = Math.Round(point.Y / _cellSize) * _cellSize;
+            point.X = Math.Round(point.X / CELL_SIZE) * CELL_SIZE;
+            point.Y = Math.Round(point.Y / CELL_SIZE) * CELL_SIZE;
 
             return new Vector2((float)point.X, (float)point.Y);
         }
 
-        private async void Deserialize_Click(object sender, RoutedEventArgs e) {
+        private void Deserialize_Click(object sender, RoutedEventArgs e) {
 
-            BezierNode bezierNode = await CurveConverter.Deserialize();
+            BezierCurveSourceModel bezierCurveSourceModel = CurveConverter.Deserialize();
 
-            foreach (var point in bezierNode.Nodes) {
+            foreach (var point in bezierCurveSourceModel.Nodes) {
                 Drawer.DrawPoint(point, Brushes.Black, CanvasXY);
             }
 
-            _curve = new Bezier(bezierNode, _accuracy);
-            Drawer.DrawCurve(_curve.GetBezierCurve(), CanvasXY);
+            _curveObject = BezierCurveBuilder.Build(bezierCurveSourceModel, ACCURACY);
+            Drawer.DrawCurve(_curveObject.GetBezierCurve(), CanvasXY);
             
 
         }
 
         private void Serialize_Click(object sender, RoutedEventArgs e) {
+            BezierCurveSourceModel bezierCurveSourceModel = new BezierCurveSourceModel {
+                Nodes = new List<Vector2>(_newPoints)
+            };
 
-            BezierNode bezierNode = new BezierNode();
-            bezierNode.Nodes.AddRange(_newPoints);
-
-            CurveConverter.Serialize(bezierNode);
+            CurveConverter.Serialize(bezierCurveSourceModel);
         }
 
         private void CheckBox_Switcher(object sender, RoutedEventArgs e) {
-
-            if (_isEnableActivateRedrawing) {
-
-                _isEnableActivateRedrawing = false;
-
-            } else {
-
-                _isEnableActivateRedrawing = true;
-
-            }
+            _isEnableActivateRedrawing = !_isEnableActivateRedrawing;
         }
 
         private void Window_Closed(object sender, EventArgs e) {
