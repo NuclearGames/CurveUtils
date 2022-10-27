@@ -28,7 +28,9 @@ jobs:
         echo "VERSION=${GITHUB_REF/refs\/tags\/v/}" >> $GITHUB_ENV
         
     - name: Restore dependencies
-      run: dotnet restore
+      run: |
+        echo ls
+        dotnet restore ./BezierCurveLib
     - name: Build
       run: dotnet build BezierCurveLib --configuration Release /p:Version=${VERSION} --no-restore --verbosity normal
     # - name: Test
