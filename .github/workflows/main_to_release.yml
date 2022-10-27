@@ -29,8 +29,8 @@ jobs:
         
     - name: Restore dependencies
       run: |
-        echo ls
-        dotnet restore ./BezierCurveLib
+        echo ${GITHUB_WORKSPACE}
+        dotnet restore ./BezierCurveLib/BezierCurveLib.csproj
     - name: Build
       run: dotnet build BezierCurveLib --configuration Release /p:Version=${VERSION} --no-restore --verbosity normal
     # - name: Test
