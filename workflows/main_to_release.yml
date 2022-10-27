@@ -1,0 +1,45 @@
+name: AUTO Build TAGGED
+
+on:
+  push:
+    tags:
+    - "v[0-9]+.[0-9]+.[0-9]+"
+jobs:
+  build_and_publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    - name: Verify commit exists in origin/main
+      run: |
+        git fetch --no-tags --prune --depth=1 origin +refs/heads/*:refs/remotes/origin/*
+        git branch --remote --contains | grep origin/main
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v2
+      with:
+        dotnet-version: 6.0.x
+      if: ${{ success() }}
+      
+    # SET NET6 variables
+    - name: set VERSION from tag
+      run: |
+        echo "VERSION=${GITHUB_REF/refs\/tags\/v/}" >> $GITHUB_ENV
+        
+    - name: Restore dependencies
+      run: dotnet restore
+    - name: Build
+      run: dotnet build BezierCurveLib --configuration Release /p:Version=${VERSION} --no-restore --verbosity normal
+    # - name: Test
+    #   run: dotnet test DefaultTypesContract --no-build --configuration Release --verbosity normal
+    - name: Pack
+      run: dotnet pack BezierCurveLib --configuration Release /p:Version=${VERSION} --no-build --output .
+    - name: Add source
+      run: dotnet nuget add source --username gr871 --password ${GITHUB_TOKEN} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/NuclearGames/index.json"
+    - name: Push
+      if: ${{ success() }}
+      run: dotnet nuget push ./NuclearGames.BezierCurveLib.${VERSION}.nupkg --source "github" --api-key ${GITHUB_TOKEN}
+      
+    env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
