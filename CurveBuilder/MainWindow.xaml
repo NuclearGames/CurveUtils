@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         Title="CurveBuilder" Height="800" Width="1220">
     <Grid Height="800" HorizontalAlignment="Left" Width="1220" VerticalAlignment="Top">
-        <Canvas x:Name="CanvasXY" Background="Gray" Margin="0,0,0,256" MouseMove="CanvasXY_MouseMove" MouseRightButtonDown="CanvasXY_MouseRightButtonDown" MouseLeftButtonDown="CanvasXY_MouseDown" Width="1220" Height="540"/>
+        <Canvas x:Name="CanvasXY" Background="Gray" MouseMove="CanvasXY_MouseMove" MouseRightButtonDown="CanvasXY_MouseRightButtonDown" MouseLeftButtonDown="CanvasXY_MouseDown" Width="1220" Height="540" Margin="0,0,0,256" HorizontalAlignment="Center" VerticalAlignment="Bottom"/>
         <Button Content="DrawCurve" HorizontalAlignment="Left" Margin="154,657,0,0" VerticalAlignment="Top" Click="DrawCurve_Click" Height="75" Width="150"/>
         <Label x:Name="labelX" Content="Label" HorizontalAlignment="Left" Margin="567,549,0,0" VerticalAlignment="Top"/>
         <Label x:Name="labelY" Content="Label" HorizontalAlignment="Left" Margin="610,549,0,0" VerticalAlignment="Top"/>

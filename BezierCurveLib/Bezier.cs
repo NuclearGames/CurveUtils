@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using System;
+using System.Drawing;
 using System.Numerics;
 using System.Reflection;
 using System.Text.Json;
@@ -29,7 +30,7 @@ namespace BezierCurveLib {
 
         public float Evaluate(float x) {
 
-            for (int i = 0; i < _curve.Count - 1; i++) {
+            for (int i = 1; i < _curve.Count - 1; i++) {
 
                 if (_curve[i].X <= x && x <= _curve[i + 1].X) {
 
@@ -38,11 +39,37 @@ namespace BezierCurveLib {
 
                     return (float)Math.Round(deltaX * k + _curve[i].Y);
 
+                }else if(_curve[i].X <= x && x <= _curve[i - 1].X) {
+
+                    float deltaX = x - _curve[i].X;
+                    float k = ((_curve[i - 1].Y - _curve[i].Y) / (_curve[i - 1].X - _curve[i].X));
+
+                    return (float)Math.Round(deltaX * k + _curve[i].Y);
+
                 }
 
             }
 
             return 0;
+        }
+        public float MaxX() {
+            float max = _curve[0].X;
+            for (int i = 0; i < _curve.Count; i++) {
+                if (_curve[i].X > max) {
+                    max = _curve[i].X;
+                }
+            }
+            return max;
+        }
+
+        public float MinX() {
+            float min = _curve[0].X;
+            for (int i = 0; i < _curve.Count; i++) {
+                if (_curve[i].X < min) {
+                    min = _curve[i].X;
+                }
+            }
+            return min;
         }
 
         private List<Vector2> CalculateBezierCurve() {

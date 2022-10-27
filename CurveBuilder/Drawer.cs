@@ -8,6 +8,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using System.Windows;
+using BezierCurveLib;
 
 namespace CurveBuilder {
     internal static class Drawer {
@@ -17,7 +18,7 @@ namespace CurveBuilder {
         #region Draw
 
         public static Ellipse DrawPoint(Vector2 point, SolidColorBrush color, Canvas CanvasXY) {
-
+            
             Ellipse ellipse = new Ellipse();
             ellipse.Width = 6;
             ellipse.Height = 6;
@@ -28,6 +29,12 @@ namespace CurveBuilder {
             CanvasXY.Children.Add(ellipse);
 
             return ellipse;
+        }
+
+        public static void DrawPoints(List<Vector2> points, SolidColorBrush color, Canvas CanvasXY) {
+            foreach (var point in points) {
+                DrawPoint(point, color, CanvasXY);
+            }
         }
 
         public static Line DrawLine(Vector2 from, Vector2 to, SolidColorBrush color, Canvas CanvasXY) {
