@@ -22,7 +22,7 @@ namespace CurveBuilder {
         private readonly int _cellSize = 10;
 
         private bool isExistCurve = false;
-        private bool isEnableActivateRedrawing = true;
+        private bool isEnableActivateRedrawing = false;
 
         public MainWindow() {
             InitializeComponent();
@@ -168,6 +168,14 @@ namespace CurveBuilder {
             bezierNode.Nodes.AddRange(_newPoints);
 
             CurveConverter.Serialize(bezierNode);
+        }
+
+        private void CheckBox_Switcher(object sender, RoutedEventArgs e) {
+            if (isEnableActivateRedrawing) {
+                isEnableActivateRedrawing = false;
+            } else {
+                isEnableActivateRedrawing = true;
+            }
         }
     }
     #endregion
