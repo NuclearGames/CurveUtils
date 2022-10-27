@@ -2,6 +2,7 @@
 using System.IO;
 using System.Text.Json;
 using BezierCurveLib;
+using BezierCurveLib.Utils.Converters;
 
 namespace CurveBuilder {
     public static class CurveConverter {
