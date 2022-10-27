@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CurveBuilder"
+        Closed="Window_Closed"
         mc:Ignorable="d"
         Title="CurveBuilder" Height="800" Width="1220">
     <Grid Height="800" HorizontalAlignment="Left" Width="1220" VerticalAlignment="Top">

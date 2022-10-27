@@ -13,16 +13,18 @@ namespace CurveBuilder {
     /// </summary>
     public partial class MainWindow : Window {
 
-        private Bezier? _Curve;
-        private Ellipse? prevPoint;
+        private Bezier? _curve;
+        private Ellipse? _prevPoint;
 
         private List<Vector2> _newPoints = new List<Vector2>();
 
         private readonly float _accuracy = 0.001f;
         private readonly int _cellSize = 10;
 
-        private bool isExistCurve = false;
-        private bool isEnableActivateRedrawing = false;
+        private bool _isExistCurve = false;
+        private bool _isEnableActivateRedrawing = false;
+
+        
 
         public MainWindow() {
             InitializeComponent();
@@ -34,19 +36,18 @@ namespace CurveBuilder {
             Drawer.onCurveDrawn += CurveExistHandler;
         }
 
-        // а как? 
-        public static void Discribe() {
-            
+        public void Discribe() {
+            Drawer.onCurveDrawn -= CurveExistHandler;
         }
 
         private void CurveExistHandler(bool value) {
 
-            isExistCurve = value;
+            _isExistCurve = value;
 
         }
         private void ActiveRedrawing() {
 
-            if (_newPoints.Count >= 3 && isEnableActivateRedrawing) {
+            if (_newPoints.Count >= 3 && _isEnableActivateRedrawing) {
 
                 Clear();
 
@@ -55,8 +56,8 @@ namespace CurveBuilder {
 
                 bezierNode.Nodes.AddRange(_newPoints);
 
-                _Curve = new Bezier(bezierNode, _accuracy);
-                Drawer.DrawCurve(_Curve.GetBezierCurve(), CanvasXY);
+                _curve = new Bezier(bezierNode, _accuracy);
+                Drawer.DrawCurve(_curve.GetBezierCurve(), CanvasXY);
 
             }
         }
@@ -87,8 +88,8 @@ namespace CurveBuilder {
 
             bezierNode.Nodes.AddRange(_newPoints);
 
-            _Curve = new Bezier(bezierNode, _accuracy);
-            Drawer.DrawCurve(_Curve.GetBezierCurve(), CanvasXY);
+            _curve = new Bezier(bezierNode, _accuracy);
+            Drawer.DrawCurve(_curve.GetBezierCurve(), CanvasXY);
 
         }
 
@@ -99,29 +100,29 @@ namespace CurveBuilder {
             labelX.Content = "X: " + point.X;
             labelY.Content = "Y: " + (CanvasXY.Height - point.Y);
 
-            if (_Curve == null) {
+            if (_curve == null) {
                 return;
             }
 
-            if(_Curve.GetBezierCurve().Count <= 1) {
+            if(_curve.GetBezierCurve().Count <= 1) {
                 return;
             }
 
-            if (!isExistCurve) {
+            if (!_isExistCurve) {
                 return;
             }
 
-            if (point.X > _Curve.MaxX()-1 || point.X < _Curve.MinX()+1) {
+            if (point.X > _curve.MaxX()-1 || point.X < _curve.MinX()+1) {
                 return;
             }
 
-            float Y = _Curve.Evaluate(point.X);
+            float Y = _curve.Evaluate(point.X);
             
 
             LabelOutputY.Content = "OutputY: " + (CanvasXY.Height - Y);
 
-            CanvasXY.Children.Remove(prevPoint);
-            prevPoint = Drawer.DrawPoint(new Vector2(point.X, Y), Brushes.Blue, CanvasXY);
+            CanvasXY.Children.Remove(_prevPoint);
+            _prevPoint = Drawer.DrawPoint(new Vector2(point.X, Y), Brushes.Blue, CanvasXY);
         }
 
 
@@ -166,8 +167,8 @@ namespace CurveBuilder {
                 Drawer.DrawPoint(point, Brushes.Black, CanvasXY);
             }
 
-            _Curve = new Bezier(bezierNode, _accuracy);
-            Drawer.DrawCurve(_Curve.GetBezierCurve(), CanvasXY);
+            _curve = new Bezier(bezierNode, _accuracy);
+            Drawer.DrawCurve(_curve.GetBezierCurve(), CanvasXY);
             
 
         }
@@ -182,15 +183,19 @@ namespace CurveBuilder {
 
         private void CheckBox_Switcher(object sender, RoutedEventArgs e) {
 
-            if (isEnableActivateRedrawing) {
+            if (_isEnableActivateRedrawing) {
 
-                isEnableActivateRedrawing = false;
+                _isEnableActivateRedrawing = false;
 
             } else {
 
-                isEnableActivateRedrawing = true;
+                _isEnableActivateRedrawing = true;
 
             }
+        }
+
+        private void Window_Closed(object sender, EventArgs e) {
+            Discribe();
         }
     }
     #endregion

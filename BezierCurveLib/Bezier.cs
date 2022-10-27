@@ -12,12 +12,12 @@ namespace BezierCurveLib {
         private List<Vector2> _curve = new List<Vector2>();
         private List<Vector2> _nodes = new List<Vector2>();
 
-        private float accuracy;
+        private float _accuracy;
 
         public Bezier(BezierNode nodes, float accuracy) {
 
             _nodes = nodes.Nodes;
-            this.accuracy = accuracy;
+            this._accuracy = accuracy;
             CalculateBezierCurve();
 
         }
@@ -82,7 +82,7 @@ namespace BezierCurveLib {
 
             _curve.AddRange(_nodes);
 
-            for (float t = 0; t < 1; t += accuracy) {
+            for (float t = 0; t < 1; t += _accuracy) {
                 result.Add(GetPoint(_curve.Count - 1, t));
             }
 
