@@ -27,13 +27,10 @@ jobs:
       run: |
         echo "VERSION=${GITHUB_REF/refs\/tags\/v/}" >> $GITHUB_ENV
         
-    # - name: Restore dependencies
-      # run: |
-        # echo ${GITHUB_WORKSPACE}
-        # dotnet restore ./BezierCurveLib/BezierCurveLib.csproj
+    - name: Restore dependencies
+      run: dotnet restore ./BezierCurveLib/BezierCurveLib.csproj
     - name: Build with Restore
-      # run: dotnet build BezierCurveLib --configuration Release /p:Version=${VERSION} --no-restore --verbosity normal
-      run: dotnet build ./BezierCurveLib/BezierCurveLib.csproj --configuration Release /p:Version=${VERSION} --verbosity normal
+      run: dotnet build ./BezierCurveLib/BezierCurveLib.csproj --configuration Release /p:Version=${VERSION} --no-restore --verbosity normal
     # - name: Test
     #   run: dotnet test DefaultTypesContract --no-build --configuration Release --verbosity normal
     - name: Pack
