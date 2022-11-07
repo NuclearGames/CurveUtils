@@ -14,7 +14,7 @@ namespace CurveBuilder {
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window {
-        private const float ACCURACY = 0.001f;
+        private const float ACCURACY = 0.1f;
         private const int CELL_SIZE = 10;
         
         private BezierCurve? _curveObject;
@@ -32,9 +32,11 @@ namespace CurveBuilder {
 
         public MainWindow() {
             InitializeComponent();
-            Grid.DrawGrid(CanvasXY);
+            CanvasXY.Width = 720;
+            CanvasXY.Height = 480;
             Width.Text = CanvasXY.Width.ToString();
             Height.Text = CanvasXY.Height.ToString();
+            Grid.DrawGrid(CanvasXY);
             Subscribe();
         }
 
@@ -60,12 +62,12 @@ namespace CurveBuilder {
                 Drawer.DrawPoints(_newPoints, Brushes.Black, CanvasXY);
                 BezierCurveSourceModel bezierCurveSourceModel = new BezierCurveSourceModel {
                     Nodes = new List<Vector2>(_newPoints),
-                    Width = (float)CanvasXY.Width,
-                    Height = (float)CanvasXY.Height,
+                    ratioWidth = _widthRelation,
+                    ratioHeight = _heightRelation,
                 };
 
                 _curveObject = BezierCurveBuilder.Build(bezierCurveSourceModel, ACCURACY);
-                Drawer.DrawCurve(_curveObject, CanvasXY);
+                Drawer.DrawCurve(_curveObject, bezierCurveSourceModel, CanvasXY);
 
             }
         }
@@ -95,12 +97,12 @@ namespace CurveBuilder {
 
             BezierCurveSourceModel bezierCurveSourceModel = new BezierCurveSourceModel {
                 Nodes = new List<Vector2>(_newPoints),
-                Width = (float)CanvasXY.Width,
-                Height = (float)CanvasXY.Height,
+                ratioWidth = _widthRelation,
+                ratioHeight = _heightRelation,
             };
 
             _curveObject = BezierCurveBuilder.Build(bezierCurveSourceModel, ACCURACY);
-            Drawer.DrawCurve(_curveObject, CanvasXY);
+            Drawer.DrawCurve(_curveObject, bezierCurveSourceModel, CanvasXY);
 
         }
 
@@ -110,6 +112,9 @@ namespace CurveBuilder {
 
             labelX.Content = "X: " + point.X;
             labelY.Content = "Y: " + (1 - point.Y);
+            
+            AddLabelX.Content = "X: " + Math.Round(point.X * (CanvasXY.Width / _widthRelation));
+            AddLabelY.Content = "Y: " + Math.Round((CanvasXY.Height / _heightRelation) - point.Y * (CanvasXY.Height / _heightRelation));
 
             if (_curveObject == null) {
                 return;
@@ -179,7 +184,7 @@ namespace CurveBuilder {
             }
 
             _curveObject = BezierCurveBuilder.Build(bezierCurveSourceModel, ACCURACY);
-            Drawer.DrawCurve(_curveObject, CanvasXY);
+            Drawer.DrawCurve(_curveObject, bezierCurveSourceModel, CanvasXY);
             
 
         }
@@ -187,8 +192,8 @@ namespace CurveBuilder {
         private void Serialize_Click(object sender, RoutedEventArgs e) {
             BezierCurveSourceModel bezierCurveSourceModel = new BezierCurveSourceModel {
                 Nodes = new List<Vector2>(_newPoints),
-                Width = (float)CanvasXY.Width,
-                Height = (float)CanvasXY.Height,
+                ratioWidth = _widthRelation,
+                ratioHeight = _heightRelation,
             };
 
             CurveConverter.Serialize(bezierCurveSourceModel);
@@ -203,14 +208,11 @@ namespace CurveBuilder {
         }
 
         private void CalculateRelation_Click(object sender, RoutedEventArgs e) {
-            CanvasXY.Width = Convert.ToDouble(Width.Text);
-            CanvasXY.Height = Convert.ToDouble(Height.Text);
+            _widthRelation = (float)(CanvasXY.Width / float.Parse(Width.Text));
+            _heightRelation = (float)(CanvasXY.Height / float.Parse(Height.Text));
             Clear();
             Grid.DrawGrid(CanvasXY);
 
-            if(_curveObject != null) {
-                Drawer.DrawCurve(_curveObject, CanvasXY);
-            }
 
             if(_newPoints.Count > 0) {
                 Drawer.DrawPoints(_newPoints, Brushes.Black, CanvasXY);
