@@ -12,6 +12,7 @@ using BezierCurveLib;
 
 namespace CurveBuilder {
     internal static class Drawer {
+        private const float CANVAS_WIDTH_OR_HEIGHT = 700;
 
         public static event Action<bool> onCurveDrawn;
 
@@ -24,7 +25,7 @@ namespace CurveBuilder {
             ellipse.Height = 6;
             ellipse.StrokeThickness = 4;
             ellipse.Stroke = color;
-            ellipse.Margin = new Thickness(point.X - 2, point.Y - 2, 0, 0);
+            ellipse.Margin = new Thickness(point.X* CanvasXY.Width, point.Y* CanvasXY.Height, 0, 0);
 
             CanvasXY.Children.Add(ellipse);
 
@@ -56,12 +57,17 @@ namespace CurveBuilder {
 
         }
 
-        public static void DrawCurve(List<Vector2> curve, Canvas CanvasXY) {
+        public static void DrawCurve(BezierCurve curve, Canvas CanvasXY) {
 
-            for (int i = 0; i < curve.Count - 1; i++) {
-                DrawLine(curve[i], curve[i + 1], Brushes.Red, CanvasXY);
+            for (int i = 0; i < curve.Points.Count - 1; i++) {
+                DrawLine(NormilizeVector(curve.Points[i], (float)CanvasXY.Width, (float)CanvasXY.Height),
+                         NormilizeVector(curve.Points[i+1], (float)CanvasXY.Width, (float)CanvasXY.Height), Brushes.Red, CanvasXY);
             }
             onCurveDrawn?.Invoke(true);
+        }
+
+        private static Vector2 NormilizeVector(Vector2 vector, float widthRel,float heightRel) {
+            return new Vector2(vector.X * widthRel, vector.Y * heightRel);
         }
 
         #endregion

@@ -14,6 +14,8 @@ namespace BezierCurveLib {
             return _points;
         }
 
+
+
 #region Calculation
 
         /// <summary>
@@ -26,14 +28,14 @@ namespace BezierCurveLib {
                     float deltaX = x - _points[i].X;
                     float k = (_points[i + 1].Y - _points[i].Y) / (_points[i + 1].X - _points[i].X);
 
-                    return (float)Math.Round(deltaX * k + _points[i].Y);
+                    return (deltaX * k + _points[i].Y);
                 }
 
                 if (_points[i].X <= x && x <= _points[i - 1].X) {
                     float deltaX = x - _points[i].X;
                     float k = (_points[i].Y - _points[i - 1].Y) / (_points[i - 1].X - _points[i].X);
 
-                    return (float)Math.Round(deltaX * k + _points[i].Y);
+                    return deltaX * k + _points[i].Y;
                 }
             }
 

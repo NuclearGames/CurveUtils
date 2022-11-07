@@ -7,6 +7,7 @@ using System.Windows.Media;
 using System.Windows.Shapes;
 using System.Numerics;
 using CurveBuilder.Uilts;
+using System.Windows.Controls;
 
 namespace CurveBuilder {
     /// <summary>
@@ -24,11 +25,16 @@ namespace CurveBuilder {
         private bool _isExistCurve = false;
         private bool _isEnableActivateRedrawing = false;
 
-        
+        private float _widthRelation;
+        private float _heightRelation;
+
+
 
         public MainWindow() {
             InitializeComponent();
             Grid.DrawGrid(CanvasXY);
+            Width.Text = CanvasXY.Width.ToString();
+            Height.Text = CanvasXY.Height.ToString();
             Subscribe();
         }
 
@@ -36,7 +42,7 @@ namespace CurveBuilder {
             Drawer.onCurveDrawn += CurveExistHandler;
         }
 
-        public void Discribe() {
+        public void Unsubscribe() {
             Drawer.onCurveDrawn -= CurveExistHandler;
         }
 
@@ -53,17 +59,20 @@ namespace CurveBuilder {
 
                 Drawer.DrawPoints(_newPoints, Brushes.Black, CanvasXY);
                 BezierCurveSourceModel bezierCurveSourceModel = new BezierCurveSourceModel {
-                    Nodes = new List<Vector2>(_newPoints)
+                    Nodes = new List<Vector2>(_newPoints),
+                    Width = (float)CanvasXY.Width,
+                    Height = (float)CanvasXY.Height,
                 };
 
                 _curveObject = BezierCurveBuilder.Build(bezierCurveSourceModel, ACCURACY);
-                Drawer.DrawCurve(_curveObject.GetBezierCurve(), CanvasXY);
+                Drawer.DrawCurve(_curveObject, CanvasXY);
 
             }
         }
         private void Clear() {
 
             CanvasXY.Children.Clear();
+            _curveObject = new BezierCurve(new List<Vector2>());
             Grid.DrawGrid(CanvasXY);
 
         }
@@ -85,11 +94,13 @@ namespace CurveBuilder {
         private void DrawCurve_Click(object sender, RoutedEventArgs e) {
 
             BezierCurveSourceModel bezierCurveSourceModel = new BezierCurveSourceModel {
-                Nodes = new List<Vector2>(_newPoints)
+                Nodes = new List<Vector2>(_newPoints),
+                Width = (float)CanvasXY.Width,
+                Height = (float)CanvasXY.Height,
             };
 
             _curveObject = BezierCurveBuilder.Build(bezierCurveSourceModel, ACCURACY);
-            Drawer.DrawCurve(_curveObject.GetBezierCurve(), CanvasXY);
+            Drawer.DrawCurve(_curveObject, CanvasXY);
 
         }
 
@@ -98,7 +109,7 @@ namespace CurveBuilder {
             Vector2 point = MousePositionNormalize(e.GetPosition(CanvasXY));
 
             labelX.Content = "X: " + point.X;
-            labelY.Content = "Y: " + (CanvasXY.Height - point.Y);
+            labelY.Content = "Y: " + (1 - point.Y);
 
             if (_curveObject == null) {
                 return;
@@ -119,7 +130,7 @@ namespace CurveBuilder {
             float y = _curveObject.Evaluate(point.X);
             
 
-            LabelOutputY.Content = "OutputY: " + (CanvasXY.Height - y);
+            LabelOutputY.Content = "OutputY: " + Math.Round(y*CanvasXY.Height);
 
             CanvasXY.Children.Remove(_prevPoint);
             _prevPoint = Drawer.DrawPoint(point with { Y = y }, Brushes.Blue, CanvasXY);
@@ -153,8 +164,8 @@ namespace CurveBuilder {
 
         private Vector2 MousePositionNormalize(System.Windows.Point point) {
 
-            point.X = Math.Round(point.X / CELL_SIZE) * CELL_SIZE;
-            point.Y = Math.Round(point.Y / CELL_SIZE) * CELL_SIZE;
+            point.X = Math.Round((point.X / CanvasXY.Width) / (CELL_SIZE /CanvasXY.Width)) * (CELL_SIZE / CanvasXY.Width);
+            point.Y = Math.Round((point.Y / CanvasXY.Height) / (CELL_SIZE / CanvasXY.Height)) * (CELL_SIZE / CanvasXY.Height);
 
             return new Vector2((float)point.X, (float)point.Y);
         }
@@ -168,14 +179,16 @@ namespace CurveBuilder {
             }
 
             _curveObject = BezierCurveBuilder.Build(bezierCurveSourceModel, ACCURACY);
-            Drawer.DrawCurve(_curveObject.GetBezierCurve(), CanvasXY);
+            Drawer.DrawCurve(_curveObject, CanvasXY);
             
 
         }
 
         private void Serialize_Click(object sender, RoutedEventArgs e) {
             BezierCurveSourceModel bezierCurveSourceModel = new BezierCurveSourceModel {
-                Nodes = new List<Vector2>(_newPoints)
+                Nodes = new List<Vector2>(_newPoints),
+                Width = (float)CanvasXY.Width,
+                Height = (float)CanvasXY.Height,
             };
 
             CurveConverter.Serialize(bezierCurveSourceModel);
@@ -186,8 +199,24 @@ namespace CurveBuilder {
         }
 
         private void Window_Closed(object sender, EventArgs e) {
-            Discribe();
+            Unsubscribe();
         }
+
+        private void CalculateRelation_Click(object sender, RoutedEventArgs e) {
+            CanvasXY.Width = Convert.ToDouble(Width.Text);
+            CanvasXY.Height = Convert.ToDouble(Height.Text);
+            Clear();
+            Grid.DrawGrid(CanvasXY);
+
+            if(_curveObject != null) {
+                Drawer.DrawCurve(_curveObject, CanvasXY);
+            }
+
+            if(_newPoints.Count > 0) {
+                Drawer.DrawPoints(_newPoints, Brushes.Black, CanvasXY);
+            }
+        }
+
     }
     #endregion
 }
