@@ -12,7 +12,6 @@ using BezierCurveLib;
 
 namespace CurveBuilder {
     internal static class Drawer {
-        private const float CANVAS_WIDTH_OR_HEIGHT = 700;
 
         public static event Action<bool> onCurveDrawn;
 

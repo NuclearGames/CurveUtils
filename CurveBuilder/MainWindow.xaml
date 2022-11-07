@@ -13,7 +13,7 @@
         <Label x:Name="labelX" Content="Label" HorizontalAlignment="Left" Margin="0,18,713,0" VerticalAlignment="Top"/>
         <Label x:Name="labelY" Content="Label" HorizontalAlignment="Right" Margin="0,45,824,0" VerticalAlignment="Top"/>
         <Button Content="Clear" HorizontalAlignment="Left" Margin="25,425,0,0" Click="ClearGrid_Click" VerticalAlignment="Top" Height="71" Width="145"/>
-        <Label x:Name="LabelOutputY" Content="Output Y: " HorizontalAlignment="Right" Margin="0,123,798,0" VerticalAlignment="Top"/>
+        <Label x:Name="LabelOutputY" Content="Output Y: " HorizontalAlignment="Right" Margin="0,123,664,0" VerticalAlignment="Top" Width="198"/>
         <Button Content="Deserialize and DrawCurve" HorizontalAlignment="Right" Click="Deserialize_Click" Margin="0,501,693,0" VerticalAlignment="Top" Width="144" Height="71"/>
         <Label Content="ЛКМ - Поставить точку" HorizontalAlignment="Right" Margin="0,577,700,0" VerticalAlignment="Top"/>
         <Label Content="ПКМ по точке - Убрать точку" HorizontalAlignment="Right" Margin="0,608,664,0" VerticalAlignment="Top"/>

@@ -25,11 +25,6 @@ namespace CurveBuilder {
         private bool _isExistCurve = false;
         private bool _isEnableActivateRedrawing = false;
 
-        private float _widthRelation;
-        private float _heightRelation;
-
-
-
         public MainWindow() {
             InitializeComponent();
             Grid.DrawGrid(CanvasXY);
