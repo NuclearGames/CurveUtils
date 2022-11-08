@@ -59,14 +59,10 @@ namespace CurveBuilder {
         public static void DrawCurve(BezierCurve curve, BezierCurveSourceModel curveModel , Canvas CanvasXY) {
 
             for (int i = 0; i < curve.Points.Count - 1; i++) {
-                DrawLine(NormilizeVector(curve.Points[i], curveModel.ratioWidth, curveModel.ratioHeight, CanvasXY),
-                         NormilizeVector(curve.Points[i+1], curveModel.ratioWidth, curveModel.ratioHeight, CanvasXY), Brushes.Red, CanvasXY);
+                DrawLine( new Vector2(curve.Points[i].X * (float)CanvasXY.Width, curve.Points[i].Y * (float)CanvasXY.Height) , 
+                          new Vector2(curve.Points[i+1].X * (float)CanvasXY.Width, curve.Points[i+1].Y * (float)CanvasXY.Height), Brushes.Red, CanvasXY);
             }
             onCurveDrawn?.Invoke(true);
-        }
-
-        private static Vector2 NormilizeVector(Vector2 vector, float widthRel,float heightRel, Canvas canvas) {
-            return new Vector2((float)(vector.X * canvas.Width) * widthRel, (float)(vector.Y * canvas.Height) * heightRel);
         }
 
         #endregion

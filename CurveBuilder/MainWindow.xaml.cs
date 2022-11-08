@@ -1,4 +1,5 @@
 ﻿using BezierCurveLib;
+using BezierCurveLib.Utils;
 using System;
 using System.Collections.Generic;
 using System.Windows;
@@ -14,7 +15,7 @@ namespace CurveBuilder {
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window {
-        private const float ACCURACY = 0.1f;
+        private const float ACCURACY = 0.001f;
         private const int CELL_SIZE = 10;
         
         private BezierCurve? _curveObject;
@@ -25,8 +26,8 @@ namespace CurveBuilder {
         private bool _isExistCurve = false;
         private bool _isEnableActivateRedrawing = false;
 
-        private float _widthRelation;
-        private float _heightRelation;
+        private float _widthRelation = 1;
+        private float _heightRelation = 1;
 
 
 
@@ -82,12 +83,13 @@ namespace CurveBuilder {
         #region Events
 
         private void CanvasXY_MouseDown(object sender, MouseButtonEventArgs e) {
-
             Vector2 point = MousePositionNormalize(e.GetPosition(CanvasXY));
-            if(point.Y.CompareTo(float.NaN) == 0) {
-                return;
-            } 
 
+            if (point.Y.CompareTo(float.NaN) == 0) {
+                return;
+            }
+
+           // point = StorageSystem.ConvertToStorage(point, (float)CanvasXY.Width, (float)CanvasXY.Height);
             Drawer.DrawPoint(point, Brushes.Black, CanvasXY);
             _newPoints.Add(point);
             ActiveRedrawing();
@@ -113,6 +115,7 @@ namespace CurveBuilder {
             labelX.Content = "X: " + point.X;
             labelY.Content = "Y: " + (1 - point.Y);
             
+
             AddLabelX.Content = "X: " + Math.Round(point.X * (CanvasXY.Width / _widthRelation));
             AddLabelY.Content = "Y: " + Math.Round((CanvasXY.Height / _heightRelation) - point.Y * (CanvasXY.Height / _heightRelation));
 
@@ -135,7 +138,7 @@ namespace CurveBuilder {
             float y = _curveObject.Evaluate(point.X);
             
 
-            LabelOutputY.Content = "OutputY: " + Math.Round(y*CanvasXY.Height);
+            LabelOutputY.Content = "OutputY: " + Math.Round((CanvasXY.Height / _heightRelation) - y * CanvasXY.Height/_heightRelation);
 
             CanvasXY.Children.Remove(_prevPoint);
             _prevPoint = Drawer.DrawPoint(point with { Y = y }, Brushes.Blue, CanvasXY);
@@ -208,12 +211,15 @@ namespace CurveBuilder {
         }
 
         private void CalculateRelation_Click(object sender, RoutedEventArgs e) {
-            _widthRelation = (float)(CanvasXY.Width / float.Parse(Width.Text));
-            _heightRelation = (float)(CanvasXY.Height / float.Parse(Height.Text));
-            Clear();
-            Grid.DrawGrid(CanvasXY);
+
+            var enterWidth = float.Parse(Width.Text);
+            var enterHeight = float.Parse(Height.Text);
 
 
+            if (CanvasXY.Width != enterWidth || CanvasXY.Height != enterWidth) {
+                _widthRelation = (float)(CanvasXY.Width / enterWidth);
+                _heightRelation = (float)(CanvasXY.Height / enterHeight);
+            }
             if(_newPoints.Count > 0) {
                 Drawer.DrawPoints(_newPoints, Brushes.Black, CanvasXY);
             }
