@@ -9,6 +9,7 @@ using System.Windows.Shapes;
 using System.Numerics;
 using CurveBuilder.Uilts;
 using System.Windows.Controls;
+using System.Drawing;
 
 namespace CurveBuilder {
     /// <summary>
@@ -33,8 +34,8 @@ namespace CurveBuilder {
 
         public MainWindow() {
             InitializeComponent();
-            CanvasXY.Width = 720;
-            CanvasXY.Height = 480;
+            CanvasXY.Width = 1280;
+            CanvasXY.Height = 720;
             Width.Text = CanvasXY.Width.ToString();
             Height.Text = CanvasXY.Height.ToString();
             Grid.DrawGrid(CanvasXY);
@@ -68,16 +69,61 @@ namespace CurveBuilder {
                 };
 
                 _curveObject = BezierCurveBuilder.Build(bezierCurveSourceModel, ACCURACY);
-                Drawer.DrawCurve(_curveObject, bezierCurveSourceModel, CanvasXY);
+                Drawer.DrawCurve(_curveObject, CanvasXY);
 
             }
         }
+        private Vector2 MousePositionNormalize(System.Windows.Point point) {
+            Vector2 vector = StorageSystem.ConvertForStorage(new Vector2((float)point.X, (float)point.Y), (float)CanvasXY.Width, (float)CanvasXY.Height);
+            point.X = Math.Round(vector.X / (CELL_SIZE / CanvasXY.Width)) * (CELL_SIZE / CanvasXY.Width);
+            point.Y = Math.Round(vector.Y / (CELL_SIZE / CanvasXY.Height)) * (CELL_SIZE / CanvasXY.Height);
+
+            return new Vector2((float)point.X, (float)point.Y);
+        }
+
         private void Clear() {
 
             CanvasXY.Children.Clear();
             _curveObject = new BezierCurve(new List<Vector2>());
             Grid.DrawGrid(CanvasXY);
 
+        }
+
+        private void AbsolutePointView(Vector2 point) {
+            labelX.Content = "X: " + point.X;
+            labelY.Content = "Y: " + (1 - point.Y);
+        }
+
+        private void ReducedPointView(Vector2 point) {
+            var canvasPoint = StorageSystem.ConvertForCanvas(point, (float)CanvasXY.Width / _widthRelation, (float)CanvasXY.Height / _heightRelation);
+            AddLabelX.Content = "X: " + Math.Round(canvasPoint.X);
+            AddLabelY.Content = "Y: " + Math.Round((CanvasXY.Height / _heightRelation) - canvasPoint.Y);
+        }
+
+        private void EvaluateYView(Vector2 point) {
+
+            if (_curveObject == null) {
+                return;
+            }
+
+            if (_curveObject.GetBezierCurve().Count <= 1) {
+                return;
+            }
+
+            if (!_isExistCurve) {
+                return;
+            }
+            if (point.X > _curveObject.MaxX() - ACCURACY || point.X < _curveObject.MinX() + ACCURACY) {
+                return;
+            }
+
+            float y = _curveObject.Evaluate(point.X);
+
+
+            LabelOutputY.Content = "OutputY: " + Math.Round((CanvasXY.Height / _heightRelation) - y * CanvasXY.Height / _heightRelation);
+
+            CanvasXY.Children.Remove(_prevPoint);
+            _prevPoint = Drawer.DrawPoint(point with { Y = y }, Brushes.Blue, CanvasXY);
         }
 
         #region Events
@@ -89,7 +135,6 @@ namespace CurveBuilder {
                 return;
             }
 
-           // point = StorageSystem.ConvertToStorage(point, (float)CanvasXY.Width, (float)CanvasXY.Height);
             Drawer.DrawPoint(point, Brushes.Black, CanvasXY);
             _newPoints.Add(point);
             ActiveRedrawing();
@@ -104,7 +149,7 @@ namespace CurveBuilder {
             };
 
             _curveObject = BezierCurveBuilder.Build(bezierCurveSourceModel, ACCURACY);
-            Drawer.DrawCurve(_curveObject, bezierCurveSourceModel, CanvasXY);
+            Drawer.DrawCurve(_curveObject, CanvasXY);
 
         }
 
@@ -112,36 +157,12 @@ namespace CurveBuilder {
 
             Vector2 point = MousePositionNormalize(e.GetPosition(CanvasXY));
 
-            labelX.Content = "X: " + point.X;
-            labelY.Content = "Y: " + (1 - point.Y);
+            AbsolutePointView(point);
             
+            ReducedPointView(point);
 
-            AddLabelX.Content = "X: " + Math.Round(point.X * (CanvasXY.Width / _widthRelation));
-            AddLabelY.Content = "Y: " + Math.Round((CanvasXY.Height / _heightRelation) - point.Y * (CanvasXY.Height / _heightRelation));
+            EvaluateYView(point);
 
-            if (_curveObject == null) {
-                return;
-            }
-
-            if(_curveObject.GetBezierCurve().Count <= 1) {
-                return;
-            }
-
-            if (!_isExistCurve) {
-                return;
-            }
-
-            if (point.X > _curveObject.MaxX() - ACCURACY || point.X < _curveObject.MinX() + ACCURACY) {
-                return;
-            }
-
-            float y = _curveObject.Evaluate(point.X);
-            
-
-            LabelOutputY.Content = "OutputY: " + Math.Round((CanvasXY.Height / _heightRelation) - y * CanvasXY.Height/_heightRelation);
-
-            CanvasXY.Children.Remove(_prevPoint);
-            _prevPoint = Drawer.DrawPoint(point with { Y = y }, Brushes.Blue, CanvasXY);
         }
 
 
@@ -170,14 +191,6 @@ namespace CurveBuilder {
   
         }
 
-        private Vector2 MousePositionNormalize(System.Windows.Point point) {
-
-            point.X = Math.Round((point.X / CanvasXY.Width) / (CELL_SIZE /CanvasXY.Width)) * (CELL_SIZE / CanvasXY.Width);
-            point.Y = Math.Round((point.Y / CanvasXY.Height) / (CELL_SIZE / CanvasXY.Height)) * (CELL_SIZE / CanvasXY.Height);
-
-            return new Vector2((float)point.X, (float)point.Y);
-        }
-
         private void Deserialize_Click(object sender, RoutedEventArgs e) {
 
             BezierCurveSourceModel bezierCurveSourceModel = CurveConverter.Deserialize();
@@ -187,7 +200,7 @@ namespace CurveBuilder {
             }
 
             _curveObject = BezierCurveBuilder.Build(bezierCurveSourceModel, ACCURACY);
-            Drawer.DrawCurve(_curveObject, bezierCurveSourceModel, CanvasXY);
+            Drawer.DrawCurve(_curveObject, CanvasXY);
             
 
         }
@@ -219,9 +232,6 @@ namespace CurveBuilder {
             if (CanvasXY.Width != enterWidth || CanvasXY.Height != enterWidth) {
                 _widthRelation = (float)(CanvasXY.Width / enterWidth);
                 _heightRelation = (float)(CanvasXY.Height / enterHeight);
-            }
-            if(_newPoints.Count > 0) {
-                Drawer.DrawPoints(_newPoints, Brushes.Black, CanvasXY);
             }
         }
 

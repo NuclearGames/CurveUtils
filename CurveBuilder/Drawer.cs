@@ -56,7 +56,7 @@ namespace CurveBuilder {
 
         }
 
-        public static void DrawCurve(BezierCurve curve, BezierCurveSourceModel curveModel , Canvas CanvasXY) {
+        public static void DrawCurve(BezierCurve curve, Canvas CanvasXY) {
 
             for (int i = 0; i < curve.Points.Count - 1; i++) {
                 DrawLine( new Vector2(curve.Points[i].X * (float)CanvasXY.Width, curve.Points[i].Y * (float)CanvasXY.Height) , 
