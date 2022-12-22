@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Curves", "Curves\Curves.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Curves-UnitTests", "Curves-UnitTests\Curves-UnitTests.csproj", "{87D1D3D3-0932-406B-B17C-EE5FD1F433B8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CurvesWebEditor", "CurvesWebEditor\CurvesWebEditor.csproj", "{1EFDF317-2989-4B20-A15C-85290B13A87C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{87D1D3D3-0932-406B-B17C-EE5FD1F433B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{87D1D3D3-0932-406B-B17C-EE5FD1F433B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{87D1D3D3-0932-406B-B17C-EE5FD1F433B8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1EFDF317-2989-4B20-A15C-85290B13A87C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1EFDF317-2989-4B20-A15C-85290B13A87C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1EFDF317-2989-4B20-A15C-85290B13A87C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1EFDF317-2989-4B20-A15C-85290B13A87C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
