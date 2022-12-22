@@ -1,9 +1,10 @@
-﻿using System.Numerics;
+﻿using System;
+using System.Numerics;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace BezierCurveLib.Utils.Converters {
-    public class Vector2Converter : JsonConverter<Vector2> {
+namespace Curves.Utils.Converters {
+    internal sealed class Vector2Converter : JsonConverter<Vector2> {
         public override Vector2 Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
             string? parseStr = reader.GetString();
 

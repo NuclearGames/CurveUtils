@@ -1,32 +1,32 @@
-﻿using System.Numerics;
+﻿using System.Collections.Generic;
+using System.Numerics;
 
-namespace BezierCurveLib {
-    public static class BezierCurveBuilder {
-
+namespace Curves {
+    public sealed class BezierCurveBuilder {
         /// <summary>
         /// Собирает объект кривой из объекта с опорными точками кривой
         /// </summary>
         public static BezierCurve Build(BezierCurveSourceModel model, in float accuracy) {
             return new BezierCurve(CalculateBezierCurve(model.Nodes, in accuracy));
         }
-    
+
         /// <summary>
         /// Собирает точки кривой исходя из опорных точек
         /// </summary>
         private static List<Vector2> CalculateBezierCurve(IReadOnlyCollection<Vector2> sourcePoints, in float accuracy) {
 
-            if(sourcePoints.Count == 0) {
+            if (sourcePoints.Count == 0) {
                 return new List<Vector2>();
             }
 
             List<Vector2> result = new List<Vector2>();
-            List<Vector2> sourceCopy = new List<Vector2>(sourcePoints.Count);     
+            List<Vector2> sourceCopy = new List<Vector2>(sourcePoints.Count);
 
             for (float t = 0; t < 1; t += accuracy) {
                 sourceCopy.AddRange(sourcePoints);
-                
+
                 result.Add(GetPoint(sourceCopy, in t));
-                
+
                 sourceCopy.Clear();
             }
 
@@ -45,7 +45,7 @@ namespace BezierCurveLib {
 
                 uBound -= 1;
             }
-            
+
             return sourceCopy[0];
         }
     }

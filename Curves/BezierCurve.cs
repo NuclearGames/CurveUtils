@@ -1,7 +1,9 @@
-﻿using System.Numerics;
+﻿using System;
+using System.Collections.Generic;
+using System.Numerics;
 
-namespace BezierCurveLib {
-    public class BezierCurve {
+namespace Curves {
+    public sealed class BezierCurve {
         public IReadOnlyList<Vector2> Points => _points;
 
         private readonly List<Vector2> _points;
@@ -21,7 +23,7 @@ namespace BezierCurveLib {
         /// </summary>
         public float Evaluate(float x) {
             for (int i = 1; i < _points.Count - 1; i++) {
-                
+
                 if (_points[i].X <= x && x <= _points[i + 1].X) {
                     float deltaX = x - _points[i].X;
                     float k = (_points[i + 1].Y - _points[i].Y) / (_points[i + 1].X - _points[i].X);
