@@ -45,6 +45,13 @@ function canvasPointerUp(event) {
         event.altKey);
 }
 
+function canvasWheel(event) {
+    window.canvasContext.instance.invokeMethodAsync('CanvasWheel',
+        event.deltaY,
+        event.shiftKey,
+        event.altKey);
+}
+
 window.canvasInit = (instance) => {
     var viewport = document.getElementById('canvasViewport');
     var canvases = viewport.getElementsByTagName('canvas') || [];
@@ -59,9 +66,10 @@ window.canvasInit = (instance) => {
     };
 
     window.addEventListener("resize", canvasResize);
-    window.canvasContext.viewport.addEventListener("pointermove", canvasPointerMove);
-    window.canvasContext.viewport.addEventListener("pointerdown", canvasPointerDown);
-    window.canvasContext.viewport.addEventListener("pointerup", canvasPointerUp);
+    window.addEventListener("pointermove", canvasPointerMove);
+    window.addEventListener("pointerdown", canvasPointerDown);
+    window.addEventListener("pointerup", canvasPointerUp);
+    window.addEventListener("wheel", canvasWheel);
 
     canvasResize();
 
@@ -70,10 +78,9 @@ window.canvasInit = (instance) => {
 
 window.canvasDispose = (instance) => {
     window.removeEventListener("resize", canvasResize);
-    if (window.canvasContext.viewport) {
-        window.canvasContext.viewport.removeEventListener("pointermove", canvasPointerMove);
-        window.canvasContext.viewport.removeEventListener("pointerdown", canvasPointerDown);
-        window.canvasContext.viewport.removeEventListener("pointerup", canvasPointerUp);
-    }
+    window.removeEventListener("pointermove", canvasPointerMove);
+    window.removeEventListener("pointerdown", canvasPointerDown);
+    window.removeEventListener("pointerup", canvasPointerUp);
+    window.removeEventListener("wheel", canvasWheel);
     window.canvasContext = null;
 };

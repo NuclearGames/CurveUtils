@@ -65,7 +65,6 @@
         }
         float deltaTime = time - _time;
         _time = time;
-        Console.WriteLine($"Render: {deltaTime} / {_time}");
         await _render!.Render(deltaTime);
     }
 
@@ -91,6 +90,14 @@
             return;
         }
         _render!.OnPointerUp(button, shift, alt);
+    }
+
+    [JSInvokable]
+    public void CanvasWheel(float deltaY, bool shift, bool alt) {
+        if (!HandleJsEvents) {
+            return;
+        }
+        _render!.OnWheel(deltaY, shift, alt);
     }
 
     public void Dispose(){
