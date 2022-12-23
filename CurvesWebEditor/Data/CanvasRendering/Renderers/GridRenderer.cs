@@ -15,7 +15,7 @@ namespace CurvesWebEditor.Data.CanvasRendering.Renderers {
             float startY = -MathF.Ceiling(MathF.Abs(context.Camera.LeftTopWS.Y) / gridStep) * gridStep;
             float endX = MathF.Ceiling(MathF.Abs(context.Camera.RightBottomWS.X) / gridStep) * gridStep;
             float endY = MathF.Ceiling(MathF.Abs(context.Camera.RightBottomWS.Y) / gridStep) * gridStep;
-            Console.WriteLine($"Grid: {context.Camera.Position} : {context.Camera.LeftTopWS}; {context.Camera.RightBottomWS};");
+           // Console.WriteLine($"Grid: {context.Camera.Position} : {context.Camera.LeftTopWS}; {context.Camera.RightBottomWS};");
 
             await context.Canvas.BeginPathAsync();
             for (float x = startX; x <= endX; x += gridStep) {

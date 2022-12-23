@@ -1,23 +1,37 @@
 ﻿using Blazor.Extensions.Canvas.Canvas2D;
+using Curves;
 using CurvesWebEditor.Data.CanvasRendering.Renderers;
 using CurvesWebEditor.Data.Utils;
 using System;
+using System.Collections.Generic;
 using System.Numerics;
 using System.Threading.Tasks;
 
 namespace CurvesWebEditor.Data.CanvasRendering {
     public sealed class CanvasRender {
         private readonly CanvasRenderContext _context;
-        private Vector2 _pointerPositionSS;
+        private Vector2 _pointerPositionVS;
         private Vector2 _pointerPoisitionNDC;
         private GridRenderer _grid = new GridRenderer();
         private CurveRenderer _curve = new CurveRenderer();
+        private BezierCurveRenderer _bezier;
         private bool _lmbPressed;
+
+        private List<PointView> _points = new List<PointView>();
 
         public CanvasRender(Canvas2DContext canvas, int viewportWidth, int viewportHeight) {
             _context = new CanvasRenderContext(canvas);
             _context.Viewport.Width = viewportWidth;
             _context.Viewport.Height = viewportHeight;
+
+            _bezier = new BezierCurveRenderer(new BezierCurve(new List<Vector2>() { 
+                new Vector2(0, 0),
+                new Vector2(200, 400),
+                new Vector2(500, 500)
+            }));
+
+            _points.Add(new PointView());
+            _points.Add(new PointView());
         }
 
         public void Resize(int viewportWidth, int viewportHeight) {
@@ -36,6 +50,11 @@ namespace CurvesWebEditor.Data.CanvasRendering {
 
             await _grid.Render(_context);
             await _curve.Render(_context);
+            await _bezier.Render(_context);
+
+            for (int i = 0; i < _points.Count; i++) {
+                await _points[i].Render(_context);
+            }
 
             /*  await _context.Canvas.SetStrokeStyleAsync("#1306c7");
 
@@ -68,27 +87,53 @@ namespace CurvesWebEditor.Data.CanvasRendering {
 */
 
             var delta = new Vector2(
-                positionSS.X - _pointerPositionSS.X,
-                positionSS.Y - _pointerPositionSS.Y);
+                positionSS.X - _pointerPositionVS.X,
+                positionSS.Y - _pointerPositionVS.Y);
 
       /*      _pointerPoisitionNDC = positionNDC;*/
-            _pointerPositionSS = positionSS;
+            _pointerPositionVS = positionSS;
 
             if (_lmbPressed) {
                 _context.Camera.Position -= delta;
             }
+
+            if(_activePoint != null) {
+                _activePoint.Position = TransformUtils.Transform(_pointerPositionVS, _context.Camera.ViewToWorldMatrix); ;
+            }
         }
+
+        private PointView? _activePoint;
 
         public void OnPointerDown(int button, bool shift, bool alt) {
             Console.WriteLine($"Pointer");
             if(button == 0) {
+                var pos = TransformUtils.Transform(_pointerPositionVS, _context.Camera.ViewToWorldMatrix);
+                foreach (var point in _points) {
+                    if (point.CheckPointInsize(pos)) {
+                        _activePoint = point;
+                        _activePoint.Selected = true;
+                        break;
+                    }
+                }
+            }
+
+            if(button == 1) {
                 _lmbPressed = true;
+
+                
             }
         }
 
         public void OnPointerUp(int button, bool shift, bool alt) {
             switch (button) {
                 case 0:
+                    if (_activePoint != null) {
+                        _activePoint.Selected = false;
+                    }
+                    _activePoint = null;
+                    break;
+
+                case 1:
                     _lmbPressed = false;
                     break;
             }

@@ -28,5 +28,9 @@ namespace CurvesWebEditor.Data.Utils {
         public static Vector2 Scale(Vector2 vector, Matrix4x4 matrix) {
             return Vector4.Transform(new Vector4(vector.X, vector.Y, 0, 0), matrix).ToVector2();
         }
+
+        public static float Scale(float value, Matrix4x4 matrix) {
+            return Vector4.Transform(new Vector4(value, 0, 0, 0), matrix).X;
+        }
     }
 }

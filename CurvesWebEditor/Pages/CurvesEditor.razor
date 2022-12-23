@@ -25,6 +25,7 @@
 
 
 @code {
+    private const int LEFT_PANEL_WIDTH = 200;
     private BECanvasComponent? _canvasReference;
     private Canvas2DContext? _canvasContext;
     private CanvasRender? _render;
@@ -73,7 +74,7 @@
         if (!HandleJsEvents) {
             return;
         }
-        _render!.OnPointerMove(x, y);
+        _render!.OnPointerMove(x - LEFT_PANEL_WIDTH, y);
     }
 
     [JSInvokable]

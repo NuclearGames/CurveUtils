@@ -11,7 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Data\CurvesEditing\" />
+    <ProjectReference Include="..\Curves\Curves.csproj" />
   </ItemGroup>
 
 </Project>

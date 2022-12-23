@@ -32,7 +32,7 @@ namespace CurvesWebEditor.Data.CanvasRendering.Renderers {
 
             await context.Canvas.SetLineWidthAsync(2);
             await context.Canvas.SetLineCapAsync(LineCap.Round);
-            await context.Canvas.SetStrokeStyleAsync("#FF0000");
+            await context.Canvas.SetStrokeStyleAsync("#0000FF");
             await context.Canvas.StrokeAsync();
         }
     }
