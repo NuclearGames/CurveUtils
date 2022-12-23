@@ -1,85 +1,103 @@
 ﻿@page "/curveseditor"
 @layout FullWindowLayout
+@implements IDisposable
 
 @using Blazor.Extensions
 @using Blazor.Extensions.Canvas
 @using Blazor.Extensions.Canvas.Canvas2D
+@using CurvesWebEditor.Data.CanvasRendering
 @inject IJSRuntime JsRuntime;
 
 <PageTitle>Curves Editor</PageTitle>
 
-<div id="canvasHolder" style="background-color:black; position: fixed; width: 100%; height: 80%;">
-    <BECanvas Width="600" Height="400" @ref="_canvasReference"></BECanvas>
+<div style="background-color:orange; position: fixed; width: 200px; height: 100%;">
+    <NavLink class="nav-link" href="/">
+        <span class="oi oi-list-rich" aria-hidden="true"></span> Выйти
+    </NavLink>
+
+    <p role="status">Time: @_time</p>
+    <button class="btn btn-primary">Выйти</button>
 </div>
 
-<div style="background-color:orange; position: fixed; width: 100%; height: 20%; top:80%;">
-    <p role="status">Time: @_time</p>
-    <button class="btn btn-primary" @onclick="IncrementCount">@_currentCount</button>
+<div id="canvasViewport" style="background-color:black; position: fixed; width: calc(100% - 200px); height: 100%; left:200px;">
+    <BECanvas Width="600" Height="400" @ref="_canvasReference"></BECanvas>
 </div>
 
 
 @code {
-    private int _currentCount = 0;
-    private float _time = 0f;
     private BECanvasComponent? _canvasReference;
     private Canvas2DContext? _canvasContext;
-    private float _width, _height;
+    private CanvasRender? _render;
+    private float _time = 0f;
+    private int _viewportWidth, _viewportHeight;
+    private bool _disposed;
+
+    private bool HandleJsEvents => !_disposed && _render != null;
 
     protected async override Task OnAfterRenderAsync(bool firstRender) {
-        if(firstRender){
+        if(firstRender) {
             _canvasContext = await _canvasReference.CreateCanvas2DAsync();
             await JsRuntime.InvokeAsync<object>("canvasInit", DotNetObjectReference.Create(this));
+            _render = new CanvasRender(_canvasContext, _viewportWidth, _viewportHeight);
         }
 
         await base.OnAfterRenderAsync(firstRender);
     }
 
-
     [JSInvokable]
-    public void CanvasResize(float width, float height) {
-        _width = width;
-        _height = height;
+    public void CanvasResize(int width, int height) {
+        if (_disposed) {
+            return;
+        }
+
+        _viewportWidth = width;
+        _viewportHeight = height;
+
+        if (_render != null) {
+            _render.Resize(width, height);
+        }
     }
 
     [JSInvokable]
     public async ValueTask CanvasRender(float time) {
+        if (!HandleJsEvents) {
+            return;
+        }
         float deltaTime = time - _time;
         _time = time;
-
-        await _canvasContext!.BeginBatchAsync();
-        await _canvasContext!.ClearRectAsync(0, 0, _width, _height);
-
-        await _canvasContext.SetFillStyleAsync("#ffe6e6");
-        await _canvasContext.FillRectAsync(0, 0, _width, _height);
-
-        await _canvasContext.SetStrokeStyleAsync("#1306c7");
-
-        await _canvasContext.BeginPathAsync();
-        await _canvasContext.ArcAsync(200, 200, 100, 0, 2 * Math.PI, false);
-        await _canvasContext.SetFillStyleAsync("#000000");
-        await _canvasContext.FillAsync();
-        await _canvasContext.StrokeAsync();
-
-        await _canvasContext.SetLineWidthAsync(15);
-        await _canvasContext.SetLineCapAsync(LineCap.Round);
-
-        await _canvasContext.BeginPathAsync();
-        await _canvasContext.LineToAsync(300, 500);
-        await _canvasContext.LineToAsync(_width, _height);
-        await _canvasContext.SetFillStyleAsync("#c70606");
-        await _canvasContext.FillAsync();
-        await _canvasContext.StrokeAsync();
-
-        /*await _canvasContext.SetLineWidthAsync(5f);
-        await _canvasContext.LineToAsync(100, 100);
-        await _canvasContext.LineToAsync(300, 100);
-        await _canvasContext.SetFillStyleAsync("#000000");
-        await _canvasContext.FillAsync();*/
-
-        await _canvasContext!.EndBatchAsync();
+        Console.WriteLine($"Render: {deltaTime} / {_time}");
+        await _render!.Render(deltaTime);
     }
 
-    private void IncrementCount() {
-        _currentCount++;
+    [JSInvokable]
+    public void CanvasPointerMove(int x, int y) {
+        if (!HandleJsEvents) {
+            return;
+        }
+        _render!.OnPointerMove(x, y);
+    }
+
+    [JSInvokable]
+    public void CanvasPointerDown(int button, bool shift, bool alt) {
+        if (!HandleJsEvents) {
+            return;
+        }
+        _render!.OnPointerDown(button, shift, alt);
+    }
+
+    [JSInvokable]
+    public void CanvasPointerUp(int button, bool shift, bool alt) {
+        if (!HandleJsEvents) {
+            return;
+        }
+        _render!.OnPointerUp(button, shift, alt);
+    }
+
+    public void Dispose(){
+        Console.WriteLine($"Dispose");
+        JsRuntime.InvokeAsync<object>("canvasDispose", DotNetObjectReference.Create(this));
+        _canvasContext = null;
+        _render = null;
+        _disposed = true;
     }
 }

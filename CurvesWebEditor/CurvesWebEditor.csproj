@@ -10,4 +10,8 @@
     <PackageReference Include="Blazor.Extensions.Canvas" Version="1.1.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Data\CanvasRendering\Utils\" />
+  </ItemGroup>
+
 </Project>
