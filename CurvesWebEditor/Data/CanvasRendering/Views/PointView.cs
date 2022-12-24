@@ -1,18 +1,17 @@
 ﻿using CurvesWebEditor.Data.CanvasRendering.Renderers;
-using CurvesWebEditor.Data.Utils;
 using System;
 using System.Numerics;
 using System.Threading.Tasks;
 
-namespace CurvesWebEditor.Data.CanvasRendering {
-    public sealed class PointView : IRenderer {
-        private const float RADIUS = 50f;
+namespace CurvesWebEditor.Data.CanvasRendering.Views {
+    internal sealed class PointView : IRenderer {
+        private const float RADIUS = 0.25f;
         private const float RADIUS_SQR = RADIUS * RADIUS;
 
         internal Vector2 Position { get; set; }
         internal bool Selected { get; set; }
 
-        internal bool CheckPointInsize(Vector2 point) {
+        internal bool CheckInbound(Vector2 point) {
             var localPos = point - Position;
             float sqrDist = localPos.LengthSquared();
             Console.WriteLine($"CPI {Position} ::: {point} [{localPos}] ({sqrDist}/{RADIUS_SQR})");
@@ -20,12 +19,12 @@ namespace CurvesWebEditor.Data.CanvasRendering {
         }
 
         public async ValueTask Render(CanvasRenderContext context) {
-            var posVS = TransformUtils.Transform(Position, context.Camera.WorldToViewMatrix);
-            var radiusVS = TransformUtils.Scale(RADIUS, context.Camera.WorldToViewMatrix);
+            var posSS = context.Transformer.Point(Position);
+            var radiusSS = context.Transformer.Size(RADIUS);
 
             await context.Canvas.BeginPathAsync();
 
-            await context.Canvas.ArcAsync(posVS.X, posVS.Y, radiusVS, 0f, 360f);
+            await context.Canvas.ArcAsync(posSS.X, posSS.Y, radiusSS, 0f, 360f);
 
             await context.Canvas.SetFillStyleAsync(Selected ? "#00ff00" : "#0fff00");
             await context.Canvas.FillAsync();

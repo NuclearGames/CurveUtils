@@ -5,7 +5,7 @@ using System.Numerics;
 using System.Threading.Tasks;
 
 namespace CurvesWebEditor.Data.CanvasRendering.Renderers {
-    public sealed class CurveRenderer : IRenderer {
+    internal sealed class CurveRenderer : IRenderer {
         private readonly List<Vector2> _points;
 
         public CurveRenderer() {
@@ -21,7 +21,7 @@ namespace CurvesWebEditor.Data.CanvasRendering.Renderers {
                 return;
             }
             
-            await context.Canvas.BeginPathAsync();
+            /*await context.Canvas.BeginPathAsync();
 
             var point = TransformUtils.Transform(_points[0], context.Camera.WorldToViewMatrix);
             await context.Canvas.MoveToAsync(point.X, point.Y);
@@ -33,7 +33,7 @@ namespace CurvesWebEditor.Data.CanvasRendering.Renderers {
             await context.Canvas.SetLineWidthAsync(2);
             await context.Canvas.SetLineCapAsync(LineCap.Round);
             await context.Canvas.SetStrokeStyleAsync("#0000FF");
-            await context.Canvas.StrokeAsync();
+            await context.Canvas.StrokeAsync();*/
         }
     }
 }

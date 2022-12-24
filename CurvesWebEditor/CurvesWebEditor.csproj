@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Curves\Curves.csproj" />
+    <ProjectReference Include="..\TransformStructures\TransformStructures.csproj" />
   </ItemGroup>
 
 </Project>

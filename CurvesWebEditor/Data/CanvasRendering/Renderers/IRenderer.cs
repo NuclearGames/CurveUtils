@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 
 namespace CurvesWebEditor.Data.CanvasRendering.Renderers {
-    public interface IRenderer {
+    internal interface IRenderer {
         ValueTask Render(CanvasRenderContext context);
     }
 }

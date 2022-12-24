@@ -1,7 +1,8 @@
 ﻿using Blazor.Extensions.Canvas.Canvas2D;
 using Curves;
 using CurvesWebEditor.Data.CanvasRendering.Renderers;
-using CurvesWebEditor.Data.Utils;
+using CurvesWebEditor.Data.CanvasRendering.Views;
+using CurvesWebEditor.Data.Utils.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
@@ -10,21 +11,20 @@ using System.Threading.Tasks;
 namespace CurvesWebEditor.Data.CanvasRendering {
     public sealed class CanvasRender {
         private readonly CanvasRenderContext _context;
-        private Vector2 _pointerPositionVS;
-        private Vector2 _pointerPoisitionNDC;
-        private GridRenderer _grid = new GridRenderer();
+        private GridView _grid = new GridView();
         private CurveRenderer _curve = new CurveRenderer();
-        private BezierCurveRenderer _bezier;
-        private bool _lmbPressed;
+        private BezierCurveView _bezier;
+        private AxisView _axis;
+        private bool _moveCamera;
 
         private List<PointView> _points = new List<PointView>();
 
         public CanvasRender(Canvas2DContext canvas, int viewportWidth, int viewportHeight) {
             _context = new CanvasRenderContext(canvas);
-            _context.Viewport.Width = viewportWidth;
-            _context.Viewport.Height = viewportHeight;
+            _context.Viewport.Set(viewportWidth, viewportHeight);
 
-            _bezier = new BezierCurveRenderer(new BezierCurve(new List<Vector2>() { 
+            _axis = new AxisView();
+            _bezier = new BezierCurveView(new BezierCurve(new List<Vector2>() { 
                 new Vector2(0, 0),
                 new Vector2(200, 400),
                 new Vector2(500, 500)
@@ -35,12 +35,43 @@ namespace CurvesWebEditor.Data.CanvasRendering {
         }
 
         public void Resize(int viewportWidth, int viewportHeight) {
-            _context.Viewport.Width = viewportWidth;
-            _context.Viewport.Height = viewportHeight;
+            _context.Viewport.Set(viewportWidth, viewportHeight);
+        }
+
+        public void Test() {
+            _context.Camera.PositionWS = new Vector2(0.5f, 0f);
+            _context.Camera.Scale = 2f;
+            _context.Input.Setup();
+            Console.WriteLine($"\n\nTest data");
+            Console.WriteLine($"Camera: PosWS={_context.Camera.PositionWS}; Scale={_context.Camera.Scale}");
+            Console.WriteLine($"Viewport: W={_context.Viewport.Width}; H={_context.Viewport.Height}; Aspect={_context.Viewport.Aspect}");
+            Console.WriteLine($"Input:");
+            Console.WriteLine($"    WorldToView={_context.Input.WorldToView}");
+            Console.WriteLine($"    ViewToWorld={_context.Input.ViewToWorld}");
+            Console.WriteLine($"    ViewToScreen={_context.Input.ViewToScreen}");
+            Console.WriteLine($"    ScreenToView={_context.Input.ScreenToView}");
+            Console.WriteLine($"        WorldToScreen={_context.Input.WorldToScreen}");
+            Console.WriteLine($"        ScreenToWorld={_context.Input.ScreenToWorld}");
+            Console.WriteLine($"    LeftTopWS={_context.Input.LeftTopWS}");
+            Console.WriteLine($"    RightBottomWS={_context.Input.RightBottomWS}");
+            Console.WriteLine();
+
+            var v1 = new Vector2(0, 0);
+            Console.WriteLine($"Vector: {v1}");
+            Console.WriteLine($"    *WorldToScreen={_context.Input.WorldToScreen * v1.ToVector3(1)}");
+
+            var v2 = new Vector2(-1, _context.Viewport.Aspect);
+            Console.WriteLine($"Vector: {v2}");
+            Console.WriteLine($"    *WorldToScreen={_context.Input.WorldToScreen * v2.ToVector3(1)}");
+
+            var v3 = new Vector2(-210f, 0);
+            Console.WriteLine($"Vector: {v3}");
+            Console.WriteLine($"    *ScreenToWorld={_context.Input.ScreenToWorld * v3.ToVector3(1)}");
         }
 
         public async ValueTask Render(float deltaTime) {
-            _context.Camera.UpdateParams(_context);
+            // return;
+            _context.Input.Setup();
 
             await _context.Canvas.BeginBatchAsync();
 
@@ -49,6 +80,7 @@ namespace CurvesWebEditor.Data.CanvasRendering {
             await _context.Canvas.FillRectAsync(0, 0, _context.Viewport.Width, _context.Viewport.Height);
 
             await _grid.Render(_context);
+            await _axis.Render(_context);
             await _curve.Render(_context);
             await _bezier.Render(_context);
 
@@ -56,71 +88,43 @@ namespace CurvesWebEditor.Data.CanvasRendering {
                 await _points[i].Render(_context);
             }
 
-            /*  await _context.Canvas.SetStrokeStyleAsync("#1306c7");
-
-              await _context.Canvas.BeginPathAsync();
-              await _context.Canvas.ArcAsync(200, 200, 100, 0, 2 * Math.PI, false);
-              await _context.Canvas.SetFillStyleAsync("#000000");
-              await _context.Canvas.FillAsync();
-              await _context.Canvas.StrokeAsync();
-
-              await _context.Canvas.SetLineWidthAsync(15);
-              await _context.Canvas.SetLineCapAsync(LineCap.Round);
-
-              await _context.Canvas.BeginPathAsync();
-              await _context.Canvas.LineToAsync(0, 0);
-              await _context.Canvas.LineToAsync(_context.ViewportWidth, _context.ViewportHeight);
-              await _context.Canvas.SetFillStyleAsync("#c70606");
-              await _context.Canvas.FillAsync();
-              await _context.Canvas.StrokeAsync();
-
-              */
-            await _context.Canvas!.EndBatchAsync();
+            await _context.Canvas.EndBatchAsync();
         }
 
         public void OnPointerMove(int viewportX, int viewportY) {
-            var positionSS = new Vector2(viewportX, viewportY);
+            _context.UserInput.SetPointerPositionSS(new Vector2(viewportX, viewportY));
 
-        /*    var positionNDC = new Vector2(
-                (viewportX - _context.ViewportWidth) / (float)_context.ViewportWidth,
-                viewportY / (float)_context.ViewportHeight);
-*/
-
-            var delta = new Vector2(
-                positionSS.X - _pointerPositionVS.X,
-                positionSS.Y - _pointerPositionVS.Y);
-
-      /*      _pointerPoisitionNDC = positionNDC;*/
-            _pointerPositionVS = positionSS;
-
-            if (_lmbPressed) {
-                _context.Camera.Position -= delta;
+            if (_moveCamera) {
+                _context.Camera.PositionWS -= _context.UserInput.PointerDeltaWS;
+                Console.WriteLine($"{_context.Camera.PositionWS}; {_context.UserInput.PointerPositionWS}");
             }
 
             if(_activePoint != null) {
-                _activePoint.Position = TransformUtils.Transform(_pointerPositionVS, _context.Camera.ViewToWorldMatrix); ;
+                _activePoint.Position = _context.UserInput.PointerPositionWS;
             }
         }
 
         private PointView? _activePoint;
 
         public void OnPointerDown(int button, bool shift, bool alt) {
-            Console.WriteLine($"Pointer");
-            if(button == 0) {
-                var pos = TransformUtils.Transform(_pointerPositionVS, _context.Camera.ViewToWorldMatrix);
-                foreach (var point in _points) {
-                    if (point.CheckPointInsize(pos)) {
-                        _activePoint = point;
-                        _activePoint.Selected = true;
-                        break;
+            switch (button) {
+                case 0:
+                    foreach (var point in _points) {
+                        if (point.CheckInbound(_context.UserInput.PointerPositionWS)) {
+                            _activePoint = point;
+                            _activePoint.Selected = true;
+                            break;
+                        }
                     }
-                }
-            }
+                    break;
 
-            if(button == 1) {
-                _lmbPressed = true;
+                case 1:
+                    _moveCamera = true;
+                    break;
 
-                
+                case 2:
+                    _context.Camera.PositionWS += new Vector2(0.25f, 0.25f);
+                    break;
             }
         }
 
@@ -134,24 +138,26 @@ namespace CurvesWebEditor.Data.CanvasRendering {
                     break;
 
                 case 1:
-                    _lmbPressed = false;
+                    _moveCamera = false;
                     break;
             }
         }
 
         public void OnWheel(float deltaY, bool shift, bool alt) {
             float delta = deltaY * 0.0005f;
-            float scale = 1 - delta;
+            float scale = 1 + delta;
 
-            var trs = TransformUtils.ZoomTo(_context.Camera.Position, scale);
             _context.Camera.Scale *= scale;
-            _context.Camera.Position = TransformUtils.Transform(_context.Camera.Position, trs);
+
+            /*var trs = TransformUtils.ZoomTo(_context.Camera.PositionWS, scale);
+            _context.Camera.Scale *= scale;
+            _context.Camera.PositionWS = TransformUtils.Transform(_context.Camera.PositionWS, trs);
 
 
             _context.Camera.Scale = MathF.Max(0.05f, _context.Camera.Scale);
             _context.Camera.Scale = MathF.Min(10f, _context.Camera.Scale);
 
-            Console.WriteLine($"Wheel: {deltaY}; {_context.Camera.Scale}");
+            Console.WriteLine($"Wheel: {deltaY}; {_context.Camera.Scale}");*/
         }
     }
 }

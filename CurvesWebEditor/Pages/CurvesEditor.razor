@@ -16,7 +16,7 @@
     </NavLink>
 
     <p role="status">Time: @_time</p>
-    <button class="btn btn-primary">Выйти</button>
+    <button class="btn btn-primary" @onclick="Test">Тест</button>
 </div>
 
 <div id="canvasViewport" style="background-color:black; position: fixed; width: calc(100% - 200px); height: 100%; left:200px;">
@@ -107,5 +107,9 @@
         _canvasContext = null;
         _render = null;
         _disposed = true;
+    }
+
+    private void Test(){
+        _render!.Test();
     }
 }
