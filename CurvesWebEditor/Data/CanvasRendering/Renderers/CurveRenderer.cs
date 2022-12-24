@@ -1,39 +1,45 @@
 ﻿using Blazor.Extensions.Canvas.Canvas2D;
-using CurvesWebEditor.Data.Utils;
-using System.Collections.Generic;
+using Curves;
 using System.Numerics;
 using System.Threading.Tasks;
 
 namespace CurvesWebEditor.Data.CanvasRendering.Renderers {
     internal sealed class CurveRenderer : IRenderer {
-        private readonly List<Vector2> _points;
+        private const float XERROR = 0.001f;
 
-        public CurveRenderer() {
-            _points = new List<Vector2>();
-            _points.Add(new Vector2(0, 0));
-            _points.Add(new Vector2(500, 500));
-            _points.Add(new Vector2(500, 600));
-            _points.Add(new Vector2(800, 600));
-        }
+        internal ICurve? Curve { get; set; }
+        internal float FromX { get; set; } = 0f;
+        internal float ToX { get; set; } = 1f;
+        internal float Step { get; set; } = 0.05f;
 
         public async ValueTask Render(CanvasRenderContext context) {
-            if(_points.Count < 2) {
+            if(Curve == null) {
                 return;
             }
-            
-            /*await context.Canvas.BeginPathAsync();
 
-            var point = TransformUtils.Transform(_points[0], context.Camera.WorldToViewMatrix);
-            await context.Canvas.MoveToAsync(point.X, point.Y);
-            for(int i = 1; i < _points.Count; i++) {
-                point = TransformUtils.Transform(_points[i], context.Camera.WorldToViewMatrix);
-                await context.Canvas.LineToAsync(point.X, point.Y);
+            await context.Canvas.BeginPathAsync();
+
+            Task Draw(float x, bool first = false) {
+                float y = Curve.Evaluate(x);
+                var point = context.Transformer.Point(new Vector2(x, y));
+
+                if (first) {
+                    return context.Canvas.MoveToAsync(point.X, point.Y);
+                } else {
+                    return context.Canvas.LineToAsync(point.X, point.Y);
+                }
             }
+
+            await Draw(FromX, true);
+            for(float x = FromX + Step; x < ToX; x += Step) {
+                await Draw(x);
+            }
+            await Draw(ToX);
 
             await context.Canvas.SetLineWidthAsync(2);
             await context.Canvas.SetLineCapAsync(LineCap.Round);
             await context.Canvas.SetStrokeStyleAsync("#0000FF");
-            await context.Canvas.StrokeAsync();*/
+            await context.Canvas.StrokeAsync();
         }
     }
 }

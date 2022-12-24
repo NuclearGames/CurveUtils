@@ -13,7 +13,6 @@ namespace CurvesWebEditor.Data.CanvasRendering {
         private readonly CanvasRenderContext _context;
         private GridView _grid = new GridView();
         private CurveRenderer _curve = new CurveRenderer();
-        private BezierCurveView _bezier;
         private AxisView _axis;
         private bool _moveCamera;
 
@@ -25,17 +24,16 @@ namespace CurvesWebEditor.Data.CanvasRendering {
             _context.Viewport.Set(viewportWidth, viewportHeight);
 
             _axis = new AxisView();
-            _bezier = new BezierCurveView(new BezierCurve(new List<Vector2>() { 
-                new Vector2(0, 0),
-                new Vector2(200, 400),
-                new Vector2(500, 500)
-            }));
 
             _points.Add(new PointView());
             _points.Add(new PointView());
 
             _testText.Position = new Vector2(0.5f, -0.25f);
             _testText.Text = "0.5";
+
+            _curve.Curve = TangentBasedCurve.FromBasePoints(
+                new Vector2[] { new Vector2(0f, 0f), new Vector2(0.5f, 0.5f), new Vector2(1f, 1f) },
+                new float[] { 2f, 4f, 1f });
         }
 
         public void Resize(int viewportWidth, int viewportHeight) {
@@ -85,9 +83,8 @@ namespace CurvesWebEditor.Data.CanvasRendering {
 
             await _grid.Render(_context);
             await _axis.Render(_context);
-            await _curve.Render(_context);
-            await _bezier.Render(_context);
             await _testText.Render(_context);
+            await _curve.Render(_context);
 
             for (int i = 0; i < _points.Count; i++) {
                 foreach(var x in _points[i].GetRenderers()) {
