@@ -18,6 +18,7 @@ namespace CurvesWebEditor.Data.CanvasRendering {
         private bool _moveCamera;
 
         private List<PointView> _points = new List<PointView>();
+        private TextRenderer _testText = new TextRenderer();
 
         public CanvasRender(Canvas2DContext canvas, int viewportWidth, int viewportHeight) {
             _context = new CanvasRenderContext(canvas);
@@ -32,6 +33,9 @@ namespace CurvesWebEditor.Data.CanvasRendering {
 
             _points.Add(new PointView());
             _points.Add(new PointView());
+
+            _testText.Position = new Vector2(0.5f, -0.25f);
+            _testText.Text = "0.5";
         }
 
         public void Resize(int viewportWidth, int viewportHeight) {
@@ -83,6 +87,7 @@ namespace CurvesWebEditor.Data.CanvasRendering {
             await _axis.Render(_context);
             await _curve.Render(_context);
             await _bezier.Render(_context);
+            await _testText.Render(_context);
 
             for (int i = 0; i < _points.Count; i++) {
                 foreach(var x in _points[i].GetRenderers()) {
