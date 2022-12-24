@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 namespace CurvesWebEditor.Data.CanvasRendering.Views {
     internal class AxisView : IRenderer {
         public async ValueTask Render(CanvasRenderContext context) {
-            var fromX = context.Transformer.Point(new Vector2(context.Input.LeftTopWS.X, 0));
-            var toX = context.Transformer.Point(new Vector2(context.Input.RightBottomWS.X, 0f));
-            var fromY = context.Transformer.Point(new Vector2(0f, context.Input.RightBottomWS.Y));
-            var toY = context.Transformer.Point(new Vector2(0f, context.Input.LeftTopWS.Y));
+            var fromX = context.Transformer.Point(new Vector2(context.Input.LeftBottomWS.X, 0));
+            var toX = context.Transformer.Point(new Vector2(context.Input.RightTopWS.X, 0f));
+            var fromY = context.Transformer.Point(new Vector2(0f, context.Input.LeftBottomWS.Y));
+            var toY = context.Transformer.Point(new Vector2(0f, context.Input.RightTopWS.Y));
 
             await context.Canvas.BeginPathAsync();
             await context.Canvas.MoveToAsync(fromX.X, fromX.Y);

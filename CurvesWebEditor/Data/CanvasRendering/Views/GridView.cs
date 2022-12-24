@@ -10,10 +10,10 @@ namespace CurvesWebEditor.Data.CanvasRendering.Views {
             const float gridStep = 0.1f;
             Vector2 point;
 
-            float startX = -MathF.Ceiling(MathF.Abs(context.Input.LeftTopWS.X) / gridStep) * gridStep;
-            float endX = MathF.Ceiling(MathF.Abs(context.Input.RightBottomWS.X) / gridStep) * gridStep;
-            float startY = -MathF.Ceiling(MathF.Abs(context.Input.RightBottomWS.Y) / gridStep) * gridStep;
-            float endY = MathF.Ceiling(MathF.Abs(context.Input.LeftTopWS.Y) / gridStep) * gridStep;
+            float startX = -MathF.Ceiling(MathF.Abs(context.Input.LeftBottomWS.X) / gridStep) * gridStep;
+            float endX = MathF.Ceiling(MathF.Abs(context.Input.RightTopWS.X) / gridStep) * gridStep;
+            float startY = -MathF.Ceiling(MathF.Abs(context.Input.LeftBottomWS.Y) / gridStep) * gridStep;
+            float endY = MathF.Ceiling(MathF.Abs(context.Input.RightTopWS.Y) / gridStep) * gridStep;
             // Console.WriteLine($"Grid: {context.Camera.Position} : {context.Camera.LeftTopWS}; {context.Camera.RightBottomWS};");
 
             await context.Canvas.BeginPathAsync();

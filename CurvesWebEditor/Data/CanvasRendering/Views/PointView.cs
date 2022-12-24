@@ -1,15 +1,39 @@
 ﻿using CurvesWebEditor.Data.CanvasRendering.Renderers;
 using System;
+using System.Collections.Generic;
 using System.Numerics;
-using System.Threading.Tasks;
 
 namespace CurvesWebEditor.Data.CanvasRendering.Views {
-    internal sealed class PointView : IRenderer {
+    internal sealed class PointView : IView {
         private const float RADIUS = 0.25f;
         private const float RADIUS_SQR = RADIUS * RADIUS;
 
-        internal Vector2 Position { get; set; }
-        internal bool Selected { get; set; }
+        internal Vector2 Position {
+            get => position;
+            set {
+                position = value;
+                _renderer.Position = value;
+            }
+        }
+
+        internal bool Selected {
+            get => selected;
+            set {
+                selected = value;
+                _renderer.Color = selected ? "#ff0000" : "#00ff00";
+            }
+        }
+
+        private readonly CircleRenderer _renderer;
+        private Vector2 position;
+        private bool selected;
+
+        public PointView() {
+            _renderer = new CircleRenderer();
+            Position = Vector2.Zero;
+            Selected = false;
+            _renderer.Radius = RADIUS;
+        }
 
         internal bool CheckInbound(Vector2 point) {
             var localPos = point - Position;
@@ -18,16 +42,8 @@ namespace CurvesWebEditor.Data.CanvasRendering.Views {
             return sqrDist <= RADIUS_SQR;
         }
 
-        public async ValueTask Render(CanvasRenderContext context) {
-            var posSS = context.Transformer.Point(Position);
-            var radiusSS = context.Transformer.Size(RADIUS);
-
-            await context.Canvas.BeginPathAsync();
-
-            await context.Canvas.ArcAsync(posSS.X, posSS.Y, radiusSS, 0f, 360f);
-
-            await context.Canvas.SetFillStyleAsync(Selected ? "#00ff00" : "#0fff00");
-            await context.Canvas.FillAsync();
+        public IEnumerable<IRenderer> GetRenderers() {
+            yield return _renderer;
         }
     }
 }

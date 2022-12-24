@@ -52,8 +52,8 @@ namespace CurvesWebEditor.Data.CanvasRendering {
             Console.WriteLine($"    ScreenToView={_context.Input.ScreenToView}");
             Console.WriteLine($"        WorldToScreen={_context.Input.WorldToScreen}");
             Console.WriteLine($"        ScreenToWorld={_context.Input.ScreenToWorld}");
-            Console.WriteLine($"    LeftTopWS={_context.Input.LeftTopWS}");
-            Console.WriteLine($"    RightBottomWS={_context.Input.RightBottomWS}");
+            Console.WriteLine($"    LeftTopWS={_context.Input.LeftBottomWS}");
+            Console.WriteLine($"    RightBottomWS={_context.Input.RightTopWS}");
             Console.WriteLine();
 
             var v1 = new Vector2(0, 0);
@@ -85,7 +85,9 @@ namespace CurvesWebEditor.Data.CanvasRendering {
             await _bezier.Render(_context);
 
             for (int i = 0; i < _points.Count; i++) {
-                await _points[i].Render(_context);
+                foreach(var x in _points[i].GetRenderers()) {
+                    await x.Render(_context);
+                } 
             }
 
             await _context.Canvas.EndBatchAsync();

@@ -11,8 +11,8 @@ namespace CurvesWebEditor.Data.CanvasRendering.Utils {
         internal Matrix3x3 WorldToScreen { get; private set; }
         internal Matrix3x3 ScreenToWorld { get; private set; }
 
-        internal Vector2 LeftTopWS { get; private set; }
-        internal Vector2 RightBottomWS { get; private set; }
+        internal Vector2 LeftBottomWS { get; private set; }
+        internal Vector2 RightTopWS { get; private set; }
 
         private readonly CanvasRenderContext _context;
 
@@ -35,13 +35,8 @@ namespace CurvesWebEditor.Data.CanvasRendering.Utils {
 
             ScreenToView = ViewToScreen.Inverse();
 
-            // Должны быть (-1; aspect)
-            var leftTopVS = ScreenToView * new Vector3(0, 0, 1);
-            // (1; -aspect).
-            var rightBottomVS = ScreenToView * new Vector3(_context.Viewport.Width, _context.Viewport.Height, 1);
-
-            LeftTopWS = (ViewToWorld * leftTopVS).ToVector2();
-            RightBottomWS = (ViewToWorld * rightBottomVS).ToVector2();
+            LeftBottomWS = (ViewToWorld * new Vector3(-1, -1, 1)).ToVector2();
+            RightTopWS = (ViewToWorld * new Vector3(1, 1, 1)).ToVector2();
 
             WorldToScreen = WorldToView * ViewToScreen;
             ScreenToWorld = WorldToScreen.Inverse(); // должен быть равен ViewToWorld * ScreenToView.
