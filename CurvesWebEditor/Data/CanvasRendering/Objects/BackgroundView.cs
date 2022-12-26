@@ -9,6 +9,19 @@ namespace CurvesWebEditor.Data.CanvasRendering.Objects {
         private readonly GridRenderer _gridRenderer = new GridRenderer(0.1f, "#8a8a8a", 0.0025f);
         private readonly GridRenderer _gridWholeRenderer = new GridRenderer(1f, "#4a4848", 0.005f);
 
+        private readonly TextRenderer _xTextRenderer = new TextRenderer() { 
+            Position = new Vector2(1 - 0.05f, -0.05f),
+            Text = "1"
+        };
+        private readonly TextRenderer _yTextRenderer = new TextRenderer() {
+            Position = new Vector2(-0.05f, 1f - 0.05f),
+            Text = "1"
+        };
+        private readonly TextRenderer _zeroTextRenderer = new TextRenderer() {
+            Position = new Vector2(-0.05f, -0.05f),
+            Text = "0"
+        };
+
         public override bool CheckInbound(Vector2 positionWS) {
             return false;
         }
@@ -17,6 +30,9 @@ namespace CurvesWebEditor.Data.CanvasRendering.Objects {
             yield return _gridRenderer;
             yield return _gridWholeRenderer;
             yield return _axisRenderer;
+            yield return _xTextRenderer;
+            yield return _yTextRenderer;
+            yield return _zeroTextRenderer;
         }
     }
 }

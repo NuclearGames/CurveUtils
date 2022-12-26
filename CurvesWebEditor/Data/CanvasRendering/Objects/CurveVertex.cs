@@ -32,7 +32,7 @@ namespace CurvesWebEditor.Data.CanvasRendering.Objects {
             _center = Create(() => new DraggableCircle() { Radius = 0.025f });
             _left = Create(() => new DraggableCircle() { Radius = 0.01f });
             _right = Create(() => new DraggableCircle() { Radius = 0.01f });
-            _lineRenderer = new LineRenderer(() => _left.Position, () => _right.Position, () => 0.005f, () => "#0000ff");
+            _lineRenderer = new LineRenderer(() => _left.Position, () => _right.Position, () => 0.005f, () => "#02290c");
 
             _center.onDrag += OnDragCenter;
             _left.onDrag += OnDrag;

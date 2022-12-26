@@ -11,7 +11,7 @@ namespace CurvesWebEditor.Data.CanvasRendering.Objects {
 
         internal Vector2 Position { get; set; }
         internal float Radius { get; set; }
-        internal string Color => Pressed ? "#ff0000" : "#000000";
+        internal string Color => Pressed ? "#ff0000" : "#006b1b";
 
         public bool Pressed { get; set; }
         public bool Selected { get; set; }
