@@ -1,8 +1,5 @@
 ﻿using Blazor.Extensions.Canvas.Canvas2D;
 using CurvesWebEditor.Data.CanvasRendering.Managers;
-using CurvesWebEditor.Data.CanvasRendering.Objects;
-using CurvesWebEditor.Data.Utils.Extensions;
-using System;
 using System.Numerics;
 using System.Threading.Tasks;
 
@@ -22,39 +19,7 @@ namespace CurvesWebEditor.Data.CanvasRendering {
             _context.Viewport.Set(viewportWidth, viewportHeight);
         }
 
-        public void Test() {
-            _context.Camera.PositionWS = new Vector2(0.5f, 0f);
-            _context.Camera.Scale = 2f;
-            _context.Input.Setup();
-            Console.WriteLine($"\n\nTest data");
-            Console.WriteLine($"Camera: PosWS={_context.Camera.PositionWS}; Scale={_context.Camera.Scale}");
-            Console.WriteLine($"Viewport: W={_context.Viewport.Width}; H={_context.Viewport.Height}; Aspect={_context.Viewport.Aspect}");
-            Console.WriteLine($"Input:");
-            Console.WriteLine($"    WorldToView={_context.Input.WorldToView}");
-            Console.WriteLine($"    ViewToWorld={_context.Input.ViewToWorld}");
-            Console.WriteLine($"    ViewToScreen={_context.Input.ViewToScreen}");
-            Console.WriteLine($"    ScreenToView={_context.Input.ScreenToView}");
-            Console.WriteLine($"        WorldToScreen={_context.Input.WorldToScreen}");
-            Console.WriteLine($"        ScreenToWorld={_context.Input.ScreenToWorld}");
-            Console.WriteLine($"    LeftTopWS={_context.Input.LeftBottomWS}");
-            Console.WriteLine($"    RightBottomWS={_context.Input.RightTopWS}");
-            Console.WriteLine();
-
-            var v1 = new Vector2(0, 0);
-            Console.WriteLine($"Vector: {v1}");
-            Console.WriteLine($"    *WorldToScreen={_context.Input.WorldToScreen * v1.ToVector3(1)}");
-
-            var v2 = new Vector2(-1, _context.Viewport.Aspect);
-            Console.WriteLine($"Vector: {v2}");
-            Console.WriteLine($"    *WorldToScreen={_context.Input.WorldToScreen * v2.ToVector3(1)}");
-
-            var v3 = new Vector2(-210f, 0);
-            Console.WriteLine($"Vector: {v3}");
-            Console.WriteLine($"    *ScreenToWorld={_context.Input.ScreenToWorld * v3.ToVector3(1)}");
-        }
-
         public async ValueTask Render(float deltaTime) {
-            // return;
             _context.Input.Setup();
             await _objectsContext.RenderersManager.Render(_context);
         }
