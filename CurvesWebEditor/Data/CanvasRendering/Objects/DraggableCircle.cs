@@ -5,14 +5,13 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 
-namespace CurvesWebEditor.Data.CanvasRendering.Objects
-{
+namespace CurvesWebEditor.Data.CanvasRendering.Objects {
     internal sealed class DraggableCircle : CanvasObject, IDraggable {
         internal event Action<Vector2>? onDrag;
 
         internal Vector2 Position { get; set; }
         internal float Radius { get; set; }
-        internal string Color { get; set; } = "#000000";
+        internal string Color => Pressed ? "#ff0000" : "#000000";
 
         public bool Pressed { get; set; }
         public bool Selected { get; set; }

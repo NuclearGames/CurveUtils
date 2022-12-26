@@ -52,24 +52,22 @@ namespace CurvesWebEditor.Data.CanvasRendering.Tools {
             var tangentAspects = ordered.Select(x => MathF.Tan(x.Angle * MathConstants.Deg2Rad)).ToArray();
 
             _curve = TangentBasedCurve.FromBasePoints(points, tangentAspects);
-            _curveObject.SetCurve(_curve);
+            _curveObject.SetCurve(_curve, points.First().X, points.Last().X);
         }
 
         private void CreateVertex(Vector2 position, float angle) {
             var instance = _context.Create(() => new CurveVertex(position, angle));
-            instance.onMove += OnMoveVertex;
+            instance.onMove += UpdateCurve;
+            instance.onRotate += UpdateCurve;
             _vertexes.Add(instance);
             UpdateCurve();
         }
 
-        private void RemoveVertex(CurveVertex vertex) {
-            _context.Destroy(vertex);
-            vertex.onMove -= OnMoveVertex;
-            _vertexes.Remove(vertex);
-            UpdateCurve();
-        }
-
-        private void OnMoveVertex(Vector2 newPosition) {
+        private void RemoveVertex(CurveVertex instance) {
+            _context.Destroy(instance);
+            instance.onMove -= UpdateCurve;
+            instance.onRotate -= UpdateCurve;
+            _vertexes.Remove(instance);
             UpdateCurve();
         }
     }

@@ -58,16 +58,7 @@ namespace CurvesWebEditor.Data.CanvasRendering {
         public async ValueTask Render(float deltaTime) {
             // return;
             _context.Input.Setup();
-
-            await _context.Canvas.BeginBatchAsync();
-
-            await _context.Canvas.ClearRectAsync(0, 0, _context.Viewport.Width, _context.Viewport.Height);
-            await _context.Canvas.SetFillStyleAsync("#ffe6e6");
-            await _context.Canvas.FillRectAsync(0, 0, _context.Viewport.Width, _context.Viewport.Height);
-
             await _objectsContext.RenderersManager.Render(_context);
-
-            await _context.Canvas.EndBatchAsync();
         }
 
         public void OnPointerMove(int viewportX, int viewportY) {

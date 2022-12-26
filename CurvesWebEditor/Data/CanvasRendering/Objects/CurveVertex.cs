@@ -10,30 +10,43 @@ namespace CurvesWebEditor.Data.CanvasRendering.Objects {
     internal class CurveVertex : CanvasObject {
         private const float MAX_ANGLE = 89f;
 
-        internal event Action<Vector2>? onMove;
+        internal event Action? onMove;
+        internal event Action? onRotate;
 
-        internal Vector2 Position => _center.Position;
+        internal Vector2 Position { get; private set; }
         internal float RotateRadius { get; private set; } = 0.1f;
         internal float Angle { get; private set; }
 
-        private readonly DraggableCircle _center;
-        private readonly DraggableCircle _left;
-        private readonly DraggableCircle _right;
-        private readonly LineRenderer _lineRenderer;
+        private DraggableCircle? _center;
+        private DraggableCircle? _left;
+        private DraggableCircle? _right;
+        private LineRenderer? _lineRenderer;
 
         public CurveVertex(Vector2 position, float angle) {
+            Position = position;
             Angle = angle;
-            _center = new DraggableCircle() { Radius = 0.05f };
-            _left = new DraggableCircle() { Radius = 0.025f };
-            _right = new DraggableCircle() { Radius = 0.025f };
+        }
+
+        protected override void OnInitialize() {
+            base.OnInitialize();
+            _center = Create(() => new DraggableCircle() { Radius = 0.05f });
+            _left = Create(() => new DraggableCircle() { Radius = 0.025f });
+            _right = Create(() => new DraggableCircle() { Radius = 0.025f });
             _lineRenderer = new LineRenderer(() => _left.Position, () => _right.Position, () => 0.001f, () => "#0000ff");
 
             _center.onDrag += OnDragCenter;
             _left.onDrag += OnDrag;
             _right.onDrag += OnDrag;
 
-            _center.Position = position;
+            _center.Position = Position;
             SetLeftRightPositions();
+        }
+
+        protected override void OnDestroy() {
+            base.OnDestroy();
+            Destroy(_center!);
+            Destroy(_left!);
+            Destroy(_right!);
         }
 
         private void SetLeftRightPositions() {
@@ -41,13 +54,14 @@ namespace CurvesWebEditor.Data.CanvasRendering.Objects {
             var rightPointOS = (Matrix3x3.Rotation(Angle) * pointOS.ToVector3(1f)).ToVector2();
             var leftPointOS = (Matrix3x3.Rotation(Angle + 180f) * pointOS.ToVector3(1f)).ToVector2();
 
-            _right.Position = Position + rightPointOS;
-            _left.Position = Position + leftPointOS;
+            _right!.Position = Position + rightPointOS;
+            _left!.Position = Position + leftPointOS;
         }
 
         private void OnDragCenter(Vector2 newPosition) {
+            Position = newPosition;
             SetLeftRightPositions();
-            onMove?.Invoke(newPosition);
+            onMove?.Invoke();
         }
 
         private void OnDrag(Vector2 newPosition) {
@@ -68,24 +82,25 @@ namespace CurvesWebEditor.Data.CanvasRendering.Objects {
             Angle = MathF.Min(MAX_ANGLE, Angle);
 
             SetLeftRightPositions();
+            onRotate?.Invoke();
         }
 
         public override bool CheckInbound(Vector2 positionWS) {
-            return _center.CheckInbound(positionWS);
+            return _center!.CheckInbound(positionWS);
         }
 
         public override IEnumerable<IRenderer> GetRenderers() {
-            yield return _lineRenderer;
+            yield return _lineRenderer!;
 
-            foreach (var x in _left.GetRenderers()) {
+            foreach (var x in _left!.GetRenderers()) {
                 yield return x;
             }
 
-            foreach (var x in _right.GetRenderers()) {
+            foreach (var x in _right!.GetRenderers()) {
                 yield return x;
             }
 
-            foreach (var x in _center.GetRenderers()) {
+            foreach (var x in _center!.GetRenderers()) {
                 yield return x;
             }
         }

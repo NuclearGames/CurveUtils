@@ -12,8 +12,10 @@ namespace CurvesWebEditor.Data.CanvasRendering.Objects {
             _renderer = new CurveRenderer();
         }
 
-        internal void SetCurve(ICurve curve) {
+        internal void SetCurve(ICurve curve, float fromX, float toX) {
             _renderer.Curve = curve;
+            _renderer.FromX = fromX;
+            _renderer.ToX = toX;
         }
 
         public override bool CheckInbound(Vector2 positionWS) {

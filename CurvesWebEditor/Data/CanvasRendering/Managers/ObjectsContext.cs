@@ -4,8 +4,7 @@ using CurvesWebEditor.Data.CanvasRendering.Tools;
 using System;
 using System.Collections.Generic;
 
-namespace CurvesWebEditor.Data.CanvasRendering.Managers
-{
+namespace CurvesWebEditor.Data.CanvasRendering.Managers {
     internal sealed class ObjectsContext : IObjectsContext {
         internal InteractableManager InteractableManager { get; } = new InteractableManager();
         internal RenderersManager RenderersManager { get; }
@@ -21,12 +20,13 @@ namespace CurvesWebEditor.Data.CanvasRendering.Managers
 
         public T Create<T>(Func<T> create) where T : CanvasObject {
             var instance = create();
-            instance.Initialize(this);
+            ((ICanvasObjectHidden)instance).Initialize(this);
             Add(instance);
             return instance;
         }
 
         public void Destroy(CanvasObject obj) {
+            ((ICanvasObjectHidden)obj).DestroyEvent();
             Remove(obj);
         }
 

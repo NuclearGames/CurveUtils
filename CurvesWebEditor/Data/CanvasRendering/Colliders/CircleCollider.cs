@@ -2,8 +2,7 @@
 using System.Numerics;
 using CurvesWebEditor.Data.CanvasRendering.Interfaces;
 
-namespace CurvesWebEditor.Data.CanvasRendering.Colliders
-{
+namespace CurvesWebEditor.Data.CanvasRendering.Colliders {
     internal class CircleCollider : ICollider {
         internal Vector2 Position => _getPosition();
         internal float Radius => _getRadius();
