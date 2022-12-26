@@ -3,24 +3,34 @@ using System.Collections.Generic;
 using System.Numerics;
 
 namespace Curves {
+    /// <summary>
+    /// Кривая, основанная на положениях вершин и направлениях касательных в них.
+    /// </summary>
     public sealed class TangentBasedCurve : ICurve {
         private readonly Segment[] _sections;
+        private float _xAspect, _yAspect;
 
-        internal TangentBasedCurve(Segment[] sections) {
+        internal TangentBasedCurve(Segment[] sections, float xAspect, float yAspect) {
             _sections = sections;
+            _xAspect = xAspect;
+            _yAspect = yAspect;
         }
 
         public float Evaluate(float x) {
+            return EvaluateRaw(x / _xAspect) * _yAspect;
+        }
+
+        private float EvaluateRaw(float x) {
             // Если x правее самого правого сегмента,
             // используем правую сегмент.
-            if(x >= _sections[_sections.Length - 1].RX) {
+            if (x >= _sections[_sections.Length - 1].RX) {
                 return _sections[_sections.Length - 1].Evaluate(x);
             }
 
             // Идем по каждому сегменту и смотрим:
             // если x <= правой опорной точки, то используем этот сегмент.
-            for(int i = 0; i < _sections.Length; i++) {
-                if(x <= _sections[i].RX) {
+            for (int i = 0; i < _sections.Length; i++) {
+                if (x <= _sections[i].RX) {
                     return _sections[i].Evaluate(x);
                 }
             }
@@ -29,7 +39,11 @@ namespace Curves {
             throw new ArgumentException();
         }
 
-        public static TangentBasedCurve FromBasePoints(IReadOnlyList<Vector2> basePoints, IReadOnlyList<float> baseTangents) {
+        /// <summary>
+        /// Создает кривую по набору вершин и набору коэффициентов касательной в этих точках.
+        /// Одинаковые касательные слева и справа от вершин.
+        /// </summary>
+        public static TangentBasedCurve FromBasePoints(IReadOnlyList<Vector2> basePoints, IReadOnlyList<float> baseTangents, float xAspect = 1f, float yAspect = 1f) {
             if (basePoints.Count != baseTangents.Count) {
                 throw new ArgumentException();
             }
@@ -44,7 +58,57 @@ namespace Curves {
                 sections[i] = Segment.Fit(leftPoint, rightPoint, leftTangent, rightTangent);
             }
 
-            return new TangentBasedCurve(sections);
+            return new TangentBasedCurve(sections, xAspect, yAspect);
+        }
+
+        /// <summary>
+        /// Создает кривую по набору точек и набору коэффициентов касательной в этих точках.
+        /// Разные касательные слева и справа от вершин.
+        /// </summary>
+        public static TangentBasedCurve FromBasePoints(IReadOnlyList<Vector2> basePoints, IReadOnlyList<Vector2> baseTangents, float xAspect = 1f, float yAspect = 1f) {
+            if (basePoints.Count != baseTangents.Count) {
+                throw new ArgumentException();
+            }
+
+            var sections = new Segment[basePoints.Count - 1];
+
+            for (int i = 0; i < sections.Length; i++) {
+                var leftPoint = basePoints[i];
+                var rightPoint = basePoints[i + 1];
+                float leftTangent = baseTangents[i].Y;
+                float rightTangent = baseTangents[i + 1].X;
+                sections[i] = Segment.Fit(leftPoint, rightPoint, leftTangent, rightTangent);
+            }
+
+            return new TangentBasedCurve(sections, xAspect, yAspect);
+        }
+
+        /// <summary>
+        /// Создает кривую по объекту данных.
+        /// </summary>
+        internal static TangentBasedCurve FromData(TangentBasedCurveData data) {
+            if(data.Vertexes == null) {
+                throw new ArgumentException();
+            }
+
+            var sections = new Segment[data.Vertexes.Length - 1];
+
+            for (int i = 0; i < sections.Length; i++) {
+                var leftPoint = data.Vertexes[i].Position;
+                var rightPoint = data.Vertexes[i + 1].Position;
+                float leftTangent = data.Vertexes[i].Tangent;
+                float rightTangent = data.Vertexes[i + 1].Tangent;
+                sections[i] = Segment.Fit(leftPoint, rightPoint, leftTangent, rightTangent);
+            }
+
+            return new TangentBasedCurve(sections, data.XAspect, data.YAspect);
+        }
+        
+        /// <summary>
+        /// Создает кривую из джейсон строки.
+        /// </summary>
+        public static TangentBasedCurve FromJson(string json) {
+            return FromData(TangentBasedCurveData.FromJson(json));
         }
 
         public struct Segment {
