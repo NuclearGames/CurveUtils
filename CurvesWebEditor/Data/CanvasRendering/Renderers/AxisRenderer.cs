@@ -1,10 +1,10 @@
 ﻿using Blazor.Extensions.Canvas.Canvas2D;
-using CurvesWebEditor.Data.CanvasRendering.Renderers;
+using CurvesWebEditor.Data.CanvasRendering.Interfaces;
 using System.Numerics;
 using System.Threading.Tasks;
 
-namespace CurvesWebEditor.Data.CanvasRendering.Views {
-    internal class AxisView : IRenderer {
+namespace CurvesWebEditor.Data.CanvasRendering.Renderers {
+    internal class AxisRenderer : IRenderer {
         public async ValueTask Render(CanvasRenderContext context) {
             var fromX = context.Transformer.Point(new Vector2(context.Input.LeftBottomWS.X, 0));
             var toX = context.Transformer.Point(new Vector2(context.Input.RightTopWS.X, 0f));

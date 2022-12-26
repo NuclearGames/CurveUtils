@@ -1,39 +1,23 @@
 ﻿using Blazor.Extensions.Canvas.Canvas2D;
-using Curves;
-using CurvesWebEditor.Data.CanvasRendering.Renderers;
-using CurvesWebEditor.Data.CanvasRendering.Views;
+using CurvesWebEditor.Data.CanvasRendering.Managers;
+using CurvesWebEditor.Data.CanvasRendering.Objects;
 using CurvesWebEditor.Data.Utils.Extensions;
 using System;
-using System.Collections.Generic;
 using System.Numerics;
 using System.Threading.Tasks;
 
 namespace CurvesWebEditor.Data.CanvasRendering {
     public sealed class CanvasRender {
         private readonly CanvasRenderContext _context;
-        private GridView _grid = new GridView();
-        private CurveRenderer _curve = new CurveRenderer();
-        private AxisView _axis;
+        private readonly ObjectsContext _objectsContext;
         private bool _moveCamera;
-
-        private List<PointView> _points = new List<PointView>();
-        private TextRenderer _testText = new TextRenderer();
 
         public CanvasRender(Canvas2DContext canvas, int viewportWidth, int viewportHeight) {
             _context = new CanvasRenderContext(canvas);
+            _objectsContext = new ObjectsContext();
             _context.Viewport.Set(viewportWidth, viewportHeight);
 
-            _axis = new AxisView();
-
-            _points.Add(new PointView());
-            _points.Add(new PointView());
-
-            _testText.Position = new Vector2(0.5f, -0.25f);
-            _testText.Text = "0.5";
-
-            _curve.Curve = TangentBasedCurve.FromBasePoints(
-                new Vector2[] { new Vector2(0f, 0f), new Vector2(0.5f, 0.5f), new Vector2(1f, 1f) },
-                new float[] { 2f, 4f, 1f });
+            _objectsContext.Create(() => new BackgroundView());
         }
 
         public void Resize(int viewportWidth, int viewportHeight) {
@@ -81,16 +65,7 @@ namespace CurvesWebEditor.Data.CanvasRendering {
             await _context.Canvas.SetFillStyleAsync("#ffe6e6");
             await _context.Canvas.FillRectAsync(0, 0, _context.Viewport.Width, _context.Viewport.Height);
 
-            await _grid.Render(_context);
-            await _axis.Render(_context);
-            await _testText.Render(_context);
-            await _curve.Render(_context);
-
-            for (int i = 0; i < _points.Count; i++) {
-                foreach(var x in _points[i].GetRenderers()) {
-                    await x.Render(_context);
-                } 
-            }
+            await _objectsContext.RenderersManager.Render(_context);
 
             await _context.Canvas.EndBatchAsync();
         }
@@ -100,51 +75,32 @@ namespace CurvesWebEditor.Data.CanvasRendering {
 
             if (_moveCamera) {
                 _context.Camera.PositionWS -= _context.UserInput.PointerDeltaWS;
-                Console.WriteLine($"{_context.Camera.PositionWS}; {_context.UserInput.PointerPositionWS}");
             }
 
-            if(_activePoint != null) {
-                _activePoint.Position = _context.UserInput.PointerPositionWS;
-            }
+            _objectsContext.InteractableManager.OnPointerMove(_context.UserInput.PointerPositionWS);
+            _objectsContext.CurveEditor.OnPointerMove(_context.UserInput.PointerPositionWS);
         }
-
-        private PointView? _activePoint;
 
         public void OnPointerDown(int button, bool shift, bool alt) {
             switch (button) {
-                case 0:
-                    foreach (var point in _points) {
-                        if (point.CheckInbound(_context.UserInput.PointerPositionWS)) {
-                            _activePoint = point;
-                            _activePoint.Selected = true;
-                            break;
-                        }
-                    }
-                    break;
-
                 case 1:
                     _moveCamera = true;
                     break;
-
-                case 2:
-                    _context.Camera.PositionWS += new Vector2(0.25f, 0.25f);
-                    break;
             }
+
+            _objectsContext.InteractableManager.OnPointerDown(_context, button, shift, alt);
+            _objectsContext.CurveEditor.OnPointerDown(_context, button, shift, alt);
         }
 
         public void OnPointerUp(int button, bool shift, bool alt) {
             switch (button) {
-                case 0:
-                    if (_activePoint != null) {
-                        _activePoint.Selected = false;
-                    }
-                    _activePoint = null;
-                    break;
-
                 case 1:
                     _moveCamera = false;
                     break;
             }
+
+            _objectsContext.InteractableManager.OnPointerUp(_context, button, shift, alt);
+            _objectsContext.CurveEditor.OnPointerUp(_context, button, shift, alt);
         }
 
         public void OnWheel(float deltaY, bool shift, bool alt) {
@@ -152,16 +108,6 @@ namespace CurvesWebEditor.Data.CanvasRendering {
             float scale = 1 + delta;
 
             _context.Camera.Scale *= scale;
-
-            /*var trs = TransformUtils.ZoomTo(_context.Camera.PositionWS, scale);
-            _context.Camera.Scale *= scale;
-            _context.Camera.PositionWS = TransformUtils.Transform(_context.Camera.PositionWS, trs);
-
-
-            _context.Camera.Scale = MathF.Max(0.05f, _context.Camera.Scale);
-            _context.Camera.Scale = MathF.Min(10f, _context.Camera.Scale);
-
-            Console.WriteLine($"Wheel: {deltaY}; {_context.Camera.Scale}");*/
         }
     }
 }

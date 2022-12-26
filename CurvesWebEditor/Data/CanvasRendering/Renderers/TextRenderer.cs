@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Numerics;
 using System.Threading.Tasks;
+using CurvesWebEditor.Data.CanvasRendering.Interfaces;
 
-namespace CurvesWebEditor.Data.CanvasRendering.Renderers {
+namespace CurvesWebEditor.Data.CanvasRendering.Renderers
+{
     internal sealed class TextRenderer : IRenderer {
         internal Vector2 Position { get; set; } = Vector2.Zero;
         internal string Text { get; set; } = string.Empty;

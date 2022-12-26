@@ -1,12 +1,11 @@
 ﻿using Blazor.Extensions.Canvas.Canvas2D;
 using Curves;
+using CurvesWebEditor.Data.CanvasRendering.Interfaces;
 using System.Numerics;
 using System.Threading.Tasks;
 
 namespace CurvesWebEditor.Data.CanvasRendering.Renderers {
     internal sealed class CurveRenderer : IRenderer {
-        private const float XERROR = 0.001f;
-
         internal ICurve? Curve { get; set; }
         internal float FromX { get; set; } = 0f;
         internal float ToX { get; set; } = 1f;

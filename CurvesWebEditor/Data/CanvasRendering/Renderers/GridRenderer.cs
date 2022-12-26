@@ -1,11 +1,11 @@
 ﻿using Blazor.Extensions.Canvas.Canvas2D;
-using CurvesWebEditor.Data.CanvasRendering.Renderers;
-using System;
+using CurvesWebEditor.Data.CanvasRendering.Interfaces;
 using System.Numerics;
 using System.Threading.Tasks;
+using System;
 
-namespace CurvesWebEditor.Data.CanvasRendering.Views {
-    internal sealed class GridView : IRenderer {
+namespace CurvesWebEditor.Data.CanvasRendering.Renderers {
+    internal class GridRenderer : IRenderer {
         public async ValueTask Render(CanvasRenderContext context) {
             const float gridStep = 0.1f;
             Vector2 point;
