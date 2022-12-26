@@ -52,6 +52,10 @@ function canvasWheel(event) {
         event.altKey);
 }
 
+function canvasContextMenu(event) {
+    event.preventDefault();
+}
+
 window.canvasInit = (instance) => {
     var viewport = document.getElementById('canvasViewport');
     var canvases = viewport.getElementsByTagName('canvas') || [];
@@ -70,6 +74,7 @@ window.canvasInit = (instance) => {
     window.addEventListener("pointerdown", canvasPointerDown);
     window.addEventListener("pointerup", canvasPointerUp);
     window.addEventListener("wheel", canvasWheel);
+    window.canvasContext.canvas.addEventListener("contextmenu", canvasContextMenu);
 
     canvasResize();
 
@@ -82,5 +87,8 @@ window.canvasDispose = (instance) => {
     window.removeEventListener("pointerdown", canvasPointerDown);
     window.removeEventListener("pointerup", canvasPointerUp);
     window.removeEventListener("wheel", canvasWheel);
+    if (window.canvasContext.canvas) {
+        window.canvasContext.canvas.removeEventListener("contextmenu", canvasContextMenu);
+    }
     window.canvasContext = null;
 };
