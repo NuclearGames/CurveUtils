@@ -8,16 +8,25 @@ using System.Numerics;
 namespace CurvesWebEditor.Data.CanvasRendering.Objects {
     internal sealed class DraggableCircle : CanvasObject, IDraggable {
         internal event Action<Vector2>? onDrag;
+        internal event Action? onSelectedStateChanged;
 
+        internal bool Enabled { get; set; } = true;
         internal Vector2 Position { get; set; }
         internal float Radius { get; set; }
         internal string Color => Pressed ? "#ff0000" : "#006b1b";
 
         public bool Pressed { get; set; }
-        public bool Selected { get; set; }
+        public bool Selected {
+            get => _selected;
+            set {
+                _selected = value;
+                onSelectedStateChanged?.Invoke();
+            }
+        }
 
         private readonly CircleCollider _collider;
         private readonly CircleRenderer _renderer;
+        private bool _selected;
 
         public DraggableCircle() {
             _collider = new CircleCollider(() => Position, () => Radius);
@@ -30,11 +39,13 @@ namespace CurvesWebEditor.Data.CanvasRendering.Objects {
         }
 
         public override IEnumerable<IRenderer> GetRenderers() {
-            yield return _renderer;
+            if (Enabled) {
+                yield return _renderer;
+            }
         }
 
         public override bool CheckInbound(Vector2 pointWS) {
-            return _collider.CheckInbound(pointWS);
+            return Enabled && _collider.CheckInbound(pointWS);
         }
     }
 }

@@ -95,7 +95,7 @@ namespace CurvesWebEditor.Data.CanvasRendering.Tools {
         }
 
         private void TryRemoveVertex(CurveVertex instance) {
-            if(_vertexes.Count <= 2) {
+            if(instance == _leftVertex || instance == _rightVertex) {
                 return;
             }
 

@@ -8,7 +8,7 @@ using TransformStructures;
 
 namespace CurvesWebEditor.Data.CanvasRendering.Objects {
     internal class CurveVertex : CanvasObject {
-        private const float MAX_ANGLE = 89f;
+        private const float MAX_ANGLE = 85f;
 
         internal event Action? onMove;
         internal event Action? onRotate;
@@ -16,6 +16,7 @@ namespace CurvesWebEditor.Data.CanvasRendering.Objects {
         internal Vector2 Position {get; private set;}
         internal float RotateRadius { get; private set; } = 0.08f;
         internal float Angle { get; private set; }
+        internal bool Selected => _center!.Selected || _left!.Selected || _right!.Selected;
 
         private DraggableCircle? _center;
         private DraggableCircle? _left;
@@ -30,16 +31,20 @@ namespace CurvesWebEditor.Data.CanvasRendering.Objects {
         protected override void OnInitialize() {
             base.OnInitialize();
             _center = Create(() => new DraggableCircle() { Radius = 0.025f });
-            _left = Create(() => new DraggableCircle() { Radius = 0.01f });
-            _right = Create(() => new DraggableCircle() { Radius = 0.01f });
+            _left = Create(() => new DraggableCircle() { Radius = 0.015f });
+            _right = Create(() => new DraggableCircle() { Radius = 0.015f });
             _lineRenderer = new LineRenderer(() => _left.Position, () => _right.Position, () => 0.005f, () => "#02290c");
 
             _center.onDrag += OnDragCenter;
             _left.onDrag += OnDrag;
             _right.onDrag += OnDrag;
+            _center.onSelectedStateChanged += OnSelectedStateChanged;
+            _left.onSelectedStateChanged += OnSelectedStateChanged;
+            _right.onSelectedStateChanged += OnSelectedStateChanged;
 
             _center.Position = Position;
             SetLeftRightPositions();
+            OnSelectedStateChanged();
         }
 
         protected override void OnDestroy() {
@@ -48,7 +53,6 @@ namespace CurvesWebEditor.Data.CanvasRendering.Objects {
             Destroy(_left!);
             Destroy(_right!);
         }
-
 
         internal void SetPosition(Vector2 newPosition) {
             Position = newPosition;
@@ -63,6 +67,11 @@ namespace CurvesWebEditor.Data.CanvasRendering.Objects {
 
             _right!.Position = Position + rightPointOS;
             _left!.Position = Position + leftPointOS;
+        }
+
+        private void OnSelectedStateChanged() {
+            _left!.Enabled = Selected;
+            _right!.Enabled = Selected;
         }
 
         private void OnDragCenter(Vector2 newPosition) {
@@ -96,18 +105,8 @@ namespace CurvesWebEditor.Data.CanvasRendering.Objects {
         }
 
         public override IEnumerable<IRenderer> GetRenderers() {
-            yield return _lineRenderer!;
-
-            foreach (var x in _left!.GetRenderers()) {
-                yield return x;
-            }
-
-            foreach (var x in _right!.GetRenderers()) {
-                yield return x;
-            }
-
-            foreach (var x in _center!.GetRenderers()) {
-                yield return x;
+            if (Selected) {
+                yield return _lineRenderer!;
             }
         }
     }
