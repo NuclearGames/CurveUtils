@@ -13,7 +13,7 @@ namespace CurvesWebEditor.Data.CanvasRendering.Objects {
         internal event Action? onMove;
         internal event Action? onRotate;
 
-        internal Vector2 Position { get; private set; }
+        internal Vector2 Position {get; private set;}
         internal float RotateRadius { get; private set; } = 0.08f;
         internal float Angle { get; private set; }
 
@@ -49,6 +49,13 @@ namespace CurvesWebEditor.Data.CanvasRendering.Objects {
             Destroy(_right!);
         }
 
+
+        internal void SetPosition(Vector2 newPosition) {
+            Position = newPosition;
+            _center!.Position = Position;
+            SetLeftRightPositions();
+        }
+
         private void SetLeftRightPositions() {
             var pointOS = new Vector2(RotateRadius, 0f);
             var rightPointOS = (Matrix3x3.Rotation(Angle) * pointOS.ToVector3(1f)).ToVector2();
@@ -59,8 +66,7 @@ namespace CurvesWebEditor.Data.CanvasRendering.Objects {
         }
 
         private void OnDragCenter(Vector2 newPosition) {
-            Position = newPosition;
-            SetLeftRightPositions();
+            SetPosition(newPosition);
             onMove?.Invoke();
         }
 

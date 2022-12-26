@@ -11,14 +11,16 @@ namespace CurvesWebEditor.Data.CanvasRendering.Tools {
     internal sealed class CurveEditor : IInputHandler {
         private readonly IObjectsContext _context;
         private readonly HashSet<CurveVertex> _vertexes = new HashSet<CurveVertex>();
+        private readonly CurveVertex _leftVertex;
+        private readonly CurveVertex _rightVertex;
         private readonly CurveView _curveObject;
         private ICurve? _curve;
 
         internal CurveEditor(IObjectsContext context) {
             _context = context;
             _curveObject = _context.Create(() => new CurveView());
-            CreateVertex(new Vector2(0f, 0f), 45f);
-            CreateVertex(new Vector2(1f, 1f), 45f);
+            _leftVertex = CreateVertex(new Vector2(0f, 0f), 45f);
+            _rightVertex = CreateVertex(new Vector2(1f, 1f), 45f);
             UpdateCurve();
         }
 
@@ -36,9 +38,9 @@ namespace CurvesWebEditor.Data.CanvasRendering.Tools {
             }
 
             if (vertexToRemove != null) {
-                RemoveVertex(vertexToRemove);
+                TryRemoveVertex(vertexToRemove);
             } else {
-                CreateVertex(context.UserInput.PointerPositionWS, 45f);
+                CreateVertexAndUpdate(context.UserInput.PointerPositionWS, 45f);
             }
         }
 
@@ -47,23 +49,36 @@ namespace CurvesWebEditor.Data.CanvasRendering.Tools {
         public void OnPointerUp(CanvasRenderContext context, int button, bool shift, bool alt) { }
 
         private void UpdateCurve() {
+            // Первый и последний закрепляются на X = 0 и 1.
+            _leftVertex.SetPosition(new Vector2(0f, _leftVertex.Position.Y));
+            _rightVertex.SetPosition(new Vector2(1f, _rightVertex.Position.Y));
+
             var ordered = _vertexes.OrderBy(x => x.Position.X);
             var points = ordered.Select(x => x.Position).ToArray();
             var tangentAspects = ordered.Select(x => MathF.Tan(x.Angle * MathConstants.Deg2Rad)).ToArray();
 
             _curve = TangentBasedCurve.FromBasePoints(points, tangentAspects);
-            _curveObject.SetCurve(_curve, points.First().X, points.Last().X);
+            _curveObject.SetCurve(_curve, _leftVertex.Position.X, _rightVertex.Position.X);
         }
 
-        private void CreateVertex(Vector2 position, float angle) {
+        private void CreateVertexAndUpdate(Vector2 position, float angle) {
+            CreateVertex(position, angle);
+            UpdateCurve();
+        }
+
+        private CurveVertex CreateVertex(Vector2 position, float angle) {
             var instance = _context.Create(() => new CurveVertex(position, angle));
             instance.onMove += UpdateCurve;
             instance.onRotate += UpdateCurve;
             _vertexes.Add(instance);
-            UpdateCurve();
+            return instance;
         }
 
-        private void RemoveVertex(CurveVertex instance) {
+        private void TryRemoveVertex(CurveVertex instance) {
+            if(_vertexes.Count <= 2) {
+                return;
+            }
+
             _context.Destroy(instance);
             instance.onMove -= UpdateCurve;
             instance.onRotate -= UpdateCurve;
