@@ -94,8 +94,8 @@ namespace Curves {
             var sections = new Segment[data.Vertexes.Length - 1];
 
             for (int i = 0; i < sections.Length; i++) {
-                var leftPoint = data.Vertexes[i].Position;
-                var rightPoint = data.Vertexes[i + 1].Position;
+                var leftPoint = new Vector2(data.Vertexes[i].PositionX, data.Vertexes[i].PositionY);
+                var rightPoint = new Vector2(data.Vertexes[i+1].PositionX, data.Vertexes[i+1].PositionY);
                 float leftTangent = data.Vertexes[i].Tangent;
                 float rightTangent = data.Vertexes[i + 1].Tangent;
                 sections[i] = Segment.Fit(leftPoint, rightPoint, leftTangent, rightTangent);

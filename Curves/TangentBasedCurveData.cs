@@ -1,18 +1,18 @@
-﻿using System.Numerics;
-using System.Text.Json;
+﻿using System.Text.Json;
 
 namespace Curves {
     /// <summary>
     /// Набор данных для построения кривой.
     /// </summary>
     public class TangentBasedCurveData {
-        internal CurveVertex[]? Vertexes { get; init; }
-        internal float XAspect { get; init; }
-        internal float YAspect { get; init; }
+        public CurveVertex[]? Vertexes { get; init; }
+        public float XAspect { get; init; }
+        public float YAspect { get; init; }
 
-        internal struct CurveVertex {
-            internal Vector2 Position { get; }
-            internal float Tangent { get; }
+        public struct CurveVertex {
+            public float PositionX { get; init; }
+            public float PositionY { get; init; }
+            public float Tangent { get; init; }
         }
 
         public static TangentBasedCurveData FromJson(string json) {

@@ -5,18 +5,34 @@
 @using Blazor.Extensions
 @using Blazor.Extensions.Canvas
 @using Blazor.Extensions.Canvas.Canvas2D
+@using Curves
 @using CurvesWebEditor.Data.CanvasRendering
+@using CurvesWebEditor.Data.CurvesEditor
+@using System.IO
+@using System.Text
 @inject IJSRuntime JsRuntime;
 
 <PageTitle>Curves Editor</PageTitle>
 
-<div style="background-color:orange; position: fixed; width: 200px; height: 100%;">
-    <NavLink class="nav-link" href="/">
-        <span class="oi oi-list-rich" aria-hidden="true"></span> Выйти
-    </NavLink>
+<div style="background-color:orange; border-right:2px; position: fixed; width: 200px; height: 100%;">
+    <div style="position: fixed; width:180px; left:10px;">
+        <NavLink class="nav-link" href="/">
+            <span class="oi oi-list-rich" aria-hidden="true"></span> Выйти
+        </NavLink>
 
-    <p role="status">Time: @_time</p>
-    <button class="btn btn-primary" @onclick="Test">Тест</button>
+        <br />
+        <hr />
+        <label>Множители для осей</label>
+        <label for="xAspect">Множитель X</label>
+        <input id="xAspect" style="width:100%" @bind="_axisAspects.XString"></input>
+        <br />
+        <label for="yAspect">Множитель Y</label>
+        <input id="yAspect" style="width:100%" @bind="_axisAspects.YString"></input>
+        <br />
+        <hr />
+
+        <button @onclick="DownloadResults">Скачать</button>
+    </div>
 </div>
 
 <div id="canvasViewport" style="background-color:black; position: fixed; width: calc(100% - 200px); height: 100%; left:200px;">
@@ -32,6 +48,8 @@
     private float _time = 0f;
     private int _viewportWidth, _viewportHeight;
     private bool _disposed;
+
+    private AxisAspectValues _axisAspects = new AxisAspectValues(1f, 1f);
 
     private bool HandleJsEvents => !_disposed && _render != null;
 
@@ -101,15 +119,23 @@
         _render!.OnWheel(deltaY, shift, alt);
     }
 
+    private async Task DownloadResults() {
+        var stream = GetDownloadStream();
+        string filename = "TangentBaseCurve.json";
+        var streamRef = new DotNetStreamReference(stream);
+        await JsRuntime.InvokeAsync<object>("downloadFileFromStream", filename, streamRef);
+    }
+
+    private Stream GetDownloadStream(){
+        var data = _render!.ObjectsContext.CurveEditor.CreateData();
+        var json = TangentBasedCurveData.ToJson(data);
+        return new MemoryStream(Encoding.UTF8.GetBytes(json));
+    }
+
     public void Dispose(){
-        Console.WriteLine($"Dispose");
         JsRuntime.InvokeAsync<object>("canvasDispose", DotNetObjectReference.Create(this));
         _canvasContext = null;
         _render = null;
         _disposed = true;
-    }
-
-    private void Test(){
-        _render!.Test();
     }
 }

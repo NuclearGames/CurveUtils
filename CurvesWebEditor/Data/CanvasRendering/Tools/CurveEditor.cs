@@ -13,6 +13,8 @@ namespace CurvesWebEditor.Data.CanvasRendering.Tools {
         private readonly HashSet<CurveVertex> _vertexes = new HashSet<CurveVertex>();
         private readonly CurveVertex _leftVertex;
         private readonly CurveVertex _rightVertex;
+        private float _xAspect, _yAspect;
+
         private readonly CurveView _curveObject;
         private ICurve? _curve;
 
@@ -22,6 +24,24 @@ namespace CurvesWebEditor.Data.CanvasRendering.Tools {
             _leftVertex = CreateVertex(new Vector2(0f, 0f), 45f);
             _rightVertex = CreateVertex(new Vector2(1f, 1f), 45f);
             UpdateCurve();
+        }
+
+        internal TangentBasedCurveData CreateData() {
+            var vertexes = _vertexes
+                .Where(v => v.Position.X >= 0f && v.Position.X <= 1f)
+                .OrderBy(v => v.Position.X)
+                .Select(v => new TangentBasedCurveData.CurveVertex() { 
+                    PositionX = v.Position.X,
+                    PositionY = v.Position.Y,
+                    Tangent = GetTangent(v.Angle)
+                })
+                .ToArray();
+
+            return new TangentBasedCurveData() { 
+                Vertexes = vertexes,
+                XAspect = _xAspect,
+                YAspect = _yAspect
+            };
         }
 
         public void OnPointerDown(CanvasRenderContext context, int button, bool shift, bool alt) {
@@ -55,7 +75,7 @@ namespace CurvesWebEditor.Data.CanvasRendering.Tools {
 
             var ordered = _vertexes.OrderBy(x => x.Position.X);
             var points = ordered.Select(x => x.Position).ToArray();
-            var tangentAspects = ordered.Select(x => MathF.Tan(x.Angle * MathConstants.Deg2Rad)).ToArray();
+            var tangentAspects = ordered.Select(x => GetTangent(x.Angle)).ToArray();
 
             _curve = TangentBasedCurve.FromBasePoints(points, tangentAspects);
             _curveObject.SetCurve(_curve, _leftVertex.Position.X, _rightVertex.Position.X);
@@ -84,6 +104,10 @@ namespace CurvesWebEditor.Data.CanvasRendering.Tools {
             instance.onRotate -= UpdateCurve;
             _vertexes.Remove(instance);
             UpdateCurve();
+        }
+
+        private float GetTangent(float angle) {
+            return MathF.Tan(angle * MathConstants.Deg2Rad);
         }
     }
 }

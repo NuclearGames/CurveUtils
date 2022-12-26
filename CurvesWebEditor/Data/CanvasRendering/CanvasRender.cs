@@ -5,34 +5,34 @@ using System.Threading.Tasks;
 
 namespace CurvesWebEditor.Data.CanvasRendering {
     public sealed class CanvasRender {
-        private readonly CanvasRenderContext _context;
-        private readonly ObjectsContext _objectsContext;
+        internal readonly CanvasRenderContext RenderContext;
+        internal readonly ObjectsContext ObjectsContext;
         private bool _moveCamera;
 
         public CanvasRender(Canvas2DContext canvas, int viewportWidth, int viewportHeight) {
-            _context = new CanvasRenderContext(canvas);
-            _objectsContext = new ObjectsContext();
-            _context.Viewport.Set(viewportWidth, viewportHeight);
+            RenderContext = new CanvasRenderContext(canvas);
+            ObjectsContext = new ObjectsContext();
+            RenderContext.Viewport.Set(viewportWidth, viewportHeight);
         }
 
         public void Resize(int viewportWidth, int viewportHeight) {
-            _context.Viewport.Set(viewportWidth, viewportHeight);
+            RenderContext.Viewport.Set(viewportWidth, viewportHeight);
         }
 
         public async ValueTask Render(float deltaTime) {
-            _context.Input.Setup();
-            await _objectsContext.RenderersManager.Render(_context);
+            RenderContext.Input.Setup();
+            await ObjectsContext.RenderersManager.Render(RenderContext);
         }
 
         public void OnPointerMove(int viewportX, int viewportY) {
-            _context.UserInput.SetPointerPositionSS(new Vector2(viewportX, viewportY));
+            RenderContext.UserInput.SetPointerPositionSS(new Vector2(viewportX, viewportY));
 
             if (_moveCamera) {
-                _context.Camera.PositionWS -= _context.UserInput.PointerDeltaWS;
+                RenderContext.Camera.PositionWS -= RenderContext.UserInput.PointerDeltaWS;
             }
 
-            _objectsContext.InteractableManager.OnPointerMove(_context.UserInput.PointerPositionWS);
-            _objectsContext.CurveEditor.OnPointerMove(_context.UserInput.PointerPositionWS);
+            ObjectsContext.InteractableManager.OnPointerMove(RenderContext.UserInput.PointerPositionWS);
+            ObjectsContext.CurveEditor.OnPointerMove(RenderContext.UserInput.PointerPositionWS);
         }
 
         public void OnPointerDown(int button, bool shift, bool alt) {
@@ -42,8 +42,8 @@ namespace CurvesWebEditor.Data.CanvasRendering {
                     break;
             }
 
-            _objectsContext.InteractableManager.OnPointerDown(_context, button, shift, alt);
-            _objectsContext.CurveEditor.OnPointerDown(_context, button, shift, alt);
+            ObjectsContext.InteractableManager.OnPointerDown(RenderContext, button, shift, alt);
+            ObjectsContext.CurveEditor.OnPointerDown(RenderContext, button, shift, alt);
         }
 
         public void OnPointerUp(int button, bool shift, bool alt) {
@@ -53,15 +53,15 @@ namespace CurvesWebEditor.Data.CanvasRendering {
                     break;
             }
 
-            _objectsContext.InteractableManager.OnPointerUp(_context, button, shift, alt);
-            _objectsContext.CurveEditor.OnPointerUp(_context, button, shift, alt);
+            ObjectsContext.InteractableManager.OnPointerUp(RenderContext, button, shift, alt);
+            ObjectsContext.CurveEditor.OnPointerUp(RenderContext, button, shift, alt);
         }
 
         public void OnWheel(float deltaY, bool shift, bool alt) {
             float delta = deltaY * 0.0005f;
             float scale = 1 + delta;
 
-            _context.Camera.Scale *= scale;
+            RenderContext.Camera.Scale *= scale;
         }
     }
 }
