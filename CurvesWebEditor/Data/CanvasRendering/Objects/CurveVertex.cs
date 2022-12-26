@@ -14,7 +14,7 @@ namespace CurvesWebEditor.Data.CanvasRendering.Objects {
         internal event Action? onRotate;
 
         internal Vector2 Position { get; private set; }
-        internal float RotateRadius { get; private set; } = 0.1f;
+        internal float RotateRadius { get; private set; } = 0.08f;
         internal float Angle { get; private set; }
 
         private DraggableCircle? _center;
@@ -29,10 +29,10 @@ namespace CurvesWebEditor.Data.CanvasRendering.Objects {
 
         protected override void OnInitialize() {
             base.OnInitialize();
-            _center = Create(() => new DraggableCircle() { Radius = 0.05f });
-            _left = Create(() => new DraggableCircle() { Radius = 0.025f });
-            _right = Create(() => new DraggableCircle() { Radius = 0.025f });
-            _lineRenderer = new LineRenderer(() => _left.Position, () => _right.Position, () => 0.001f, () => "#0000ff");
+            _center = Create(() => new DraggableCircle() { Radius = 0.025f });
+            _left = Create(() => new DraggableCircle() { Radius = 0.01f });
+            _right = Create(() => new DraggableCircle() { Radius = 0.01f });
+            _lineRenderer = new LineRenderer(() => _left.Position, () => _right.Position, () => 0.005f, () => "#0000ff");
 
             _center.onDrag += OnDragCenter;
             _left.onDrag += OnDrag;

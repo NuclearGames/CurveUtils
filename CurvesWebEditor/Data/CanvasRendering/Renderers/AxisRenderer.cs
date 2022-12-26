@@ -5,6 +5,14 @@ using System.Threading.Tasks;
 
 namespace CurvesWebEditor.Data.CanvasRendering.Renderers {
     internal class AxisRenderer : IRenderer {
+        private readonly string _color;
+        private readonly float _width;
+
+        public AxisRenderer(string color, float width) {
+            _color = color;
+            _width = width;
+        }
+
         public async ValueTask Render(CanvasRenderContext context) {
             var fromX = context.Transformer.Point(new Vector2(context.Input.LeftBottomWS.X, 0));
             var toX = context.Transformer.Point(new Vector2(context.Input.RightTopWS.X, 0f));
@@ -17,9 +25,10 @@ namespace CurvesWebEditor.Data.CanvasRendering.Renderers {
             await context.Canvas.MoveToAsync(fromY.X, fromY.Y);
             await context.Canvas.LineToAsync(toY.X, toY.Y);
 
-            await context.Canvas.SetLineWidthAsync(2f);
+            float widthSS = context.Transformer.Size(_width);
+            await context.Canvas.SetLineWidthAsync(widthSS);
             await context.Canvas.SetLineCapAsync(LineCap.Butt);
-            await context.Canvas.SetStrokeStyleAsync("#000000");
+            await context.Canvas.SetStrokeStyleAsync(_color);
             await context.Canvas.StrokeAsync();
         }
     }

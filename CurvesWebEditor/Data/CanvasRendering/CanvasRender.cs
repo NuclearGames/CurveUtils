@@ -16,8 +16,6 @@ namespace CurvesWebEditor.Data.CanvasRendering {
             _context = new CanvasRenderContext(canvas);
             _objectsContext = new ObjectsContext();
             _context.Viewport.Set(viewportWidth, viewportHeight);
-
-            _objectsContext.Create(() => new BackgroundView());
         }
 
         public void Resize(int viewportWidth, int viewportHeight) {

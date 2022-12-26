@@ -9,7 +9,7 @@ namespace CurvesWebEditor.Data.CanvasRendering.Renderers {
         internal ICurve? Curve { get; set; }
         internal float FromX { get; set; } = 0f;
         internal float ToX { get; set; } = 1f;
-        internal float Step { get; set; } = 0.05f;
+        internal float Step { get; set; } = 0.025f;
 
         public async ValueTask Render(CanvasRenderContext context) {
             if(Curve == null) {
@@ -35,7 +35,8 @@ namespace CurvesWebEditor.Data.CanvasRendering.Renderers {
             }
             await Draw(ToX);
 
-            await context.Canvas.SetLineWidthAsync(2);
+            float widthSS = context.Transformer.Size(0.005f);
+            await context.Canvas.SetLineWidthAsync(widthSS);
             await context.Canvas.SetLineCapAsync(LineCap.Round);
             await context.Canvas.SetStrokeStyleAsync("#0000FF");
             await context.Canvas.StrokeAsync();

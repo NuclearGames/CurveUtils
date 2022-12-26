@@ -14,6 +14,7 @@ namespace CurvesWebEditor.Data.CanvasRendering.Managers {
         private readonly HashSet<ICanvasObject> _objects = new HashSet<ICanvasObject>();
 
         public ObjectsContext() {
+            Create(() => new BackgroundView());
             RenderersManager = new RenderersManager(this);
             CurveEditor = new CurveEditor(this);
         }

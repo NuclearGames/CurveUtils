@@ -6,18 +6,27 @@ using System;
 
 namespace CurvesWebEditor.Data.CanvasRendering.Renderers {
     internal class GridRenderer : IRenderer {
+        private readonly float _step;
+        private readonly string _color;
+        private readonly float _width;
+
+        public GridRenderer(float step, string color, float width) {
+            _step = step;
+            _color = color;
+            _width = width;
+        }
+
         public async ValueTask Render(CanvasRenderContext context) {
-            const float gridStep = 0.1f;
             Vector2 point;
 
-            float startX = -MathF.Ceiling(MathF.Abs(context.Input.LeftBottomWS.X) / gridStep) * gridStep;
-            float endX = MathF.Ceiling(MathF.Abs(context.Input.RightTopWS.X) / gridStep) * gridStep;
-            float startY = -MathF.Ceiling(MathF.Abs(context.Input.LeftBottomWS.Y) / gridStep) * gridStep;
-            float endY = MathF.Ceiling(MathF.Abs(context.Input.RightTopWS.Y) / gridStep) * gridStep;
+            float startX = -MathF.Ceiling(MathF.Abs(context.Input.LeftBottomWS.X) / _step) * _step;
+            float endX = MathF.Ceiling(MathF.Abs(context.Input.RightTopWS.X) / _step) * _step;
+            float startY = -MathF.Ceiling(MathF.Abs(context.Input.LeftBottomWS.Y) / _step) * _step;
+            float endY = MathF.Ceiling(MathF.Abs(context.Input.RightTopWS.Y) / _step) * _step;
             // Console.WriteLine($"Grid: {context.Camera.Position} : {context.Camera.LeftTopWS}; {context.Camera.RightBottomWS};");
 
             await context.Canvas.BeginPathAsync();
-            for (float x = startX; x <= endX; x += gridStep) {
+            for (float x = startX; x <= endX; x += _step) {
                 point = context.Transformer.Point(new Vector2(x, startY));
                 await context.Canvas.MoveToAsync(point.X, point.Y);
 
@@ -25,7 +34,7 @@ namespace CurvesWebEditor.Data.CanvasRendering.Renderers {
                 await context.Canvas.LineToAsync(point.X, point.Y);
             }
 
-            for (float y = startY; y <= endY; y += gridStep) {
+            for (float y = startY; y <= endY; y += _step) {
                 point = context.Transformer.Point(new Vector2(startX, y));
                 await context.Canvas.MoveToAsync(point.X, point.Y);
 
@@ -33,9 +42,10 @@ namespace CurvesWebEditor.Data.CanvasRendering.Renderers {
                 await context.Canvas.LineToAsync(point.X, point.Y);
             }
 
-            await context.Canvas.SetLineWidthAsync(1f);
+            float widthSS = context.Transformer.Size(_width);
+            await context.Canvas.SetLineWidthAsync(widthSS);
             await context.Canvas.SetLineCapAsync(LineCap.Butt);
-            await context.Canvas.SetStrokeStyleAsync("#8a8a8a");
+            await context.Canvas.SetStrokeStyleAsync(_color);
             await context.Canvas.StrokeAsync();
         }
     }
