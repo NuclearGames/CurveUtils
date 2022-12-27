@@ -28,6 +28,8 @@ namespace CurvesWebEditor.Data.CanvasRendering.Tools {
 
             _context.Html.onAxisAspectsChanged += UpdateCurve;
             _context.Html.onDrawScaledCurveChanged += UpdateCurve;
+            _context.InteractableManager.onSelectedChanged += OnSelectedChanged;
+            _context.Html.onSelectedVertexValuesChanged += OnSelectedVertexValuesChanged;
 
             UpdateCurve();
         }
@@ -101,8 +103,8 @@ namespace CurvesWebEditor.Data.CanvasRendering.Tools {
 
         private CurveVertex CreateVertex(Vector2 position, float angle) {
             var instance = _context.Create(() => new CurveVertex(position, angle));
-            instance.onMove += UpdateCurve;
-            instance.onRotate += UpdateCurve;
+            instance.onMove += OnVertexUpdated;
+            instance.onRotate += OnVertexUpdated;
             _vertexes.Add(instance);
             return instance;
         }
@@ -113,14 +115,43 @@ namespace CurvesWebEditor.Data.CanvasRendering.Tools {
             }
 
             _context.Destroy(instance);
-            instance.onMove -= UpdateCurve;
-            instance.onRotate -= UpdateCurve;
+            instance.onMove -= OnVertexUpdated;
+            instance.onRotate -= OnVertexUpdated;
             _vertexes.Remove(instance);
             UpdateCurve();
         }
 
         private float GetTangent(float angle) {
             return MathF.Tan(angle * MathConstants.Deg2Rad);
+        }
+
+        private void TryUpdateVetrexHtmlView() {
+            if (_context.InteractableManager.Selected != null && _context.InteractableManager.Selected is CurveVertexNode node) {
+                UpdateVetrexHtmlView(node.Parent);
+            }
+        }
+
+        private void UpdateVetrexHtmlView(CurveVertex vertex) {
+            _context.Html.SelectedVertexPosition = vertex.Position;
+            _context.Html.SelectedVertexAngle = vertex.Angle;
+        }
+
+        private void OnVertexUpdated() {
+            TryUpdateVetrexHtmlView();
+            UpdateCurve();
+        }
+
+        private void OnSelectedVertexValuesChanged() {
+            if (_context.InteractableManager.Selected != null && _context.InteractableManager.Selected is CurveVertexNode node) {
+                node.Parent.SetPositionAndAngle(_context.Html.SelectedVertexPosition, _context.Html.SelectedVertexAngle);
+                UpdateCurve();
+            }
+        }
+
+        private void OnSelectedChanged(IDraggable? obj) {
+            if(obj != null && obj is CurveVertexNode node) {
+                UpdateVetrexHtmlView(node.Parent);
+            }
         }
     }
 }

@@ -31,6 +31,22 @@
         <input id="yAspect" style="width:100%" @bind="_html!.AxisAspects.YString"></input>
         <br />
         <div><input type="checkbox" id="drawScaled" name="drawScaled" @bind="_html!.DrawScaledCurve.Value"><label for="drawScaled">Отображать отмасштабированную кривую</label></div>
+        
+        <hr />
+        <br />
+
+        <label>Редактирование выбранной вершины</label>
+        <label for="xAspect">X</label>
+        <input id="xAspect" style="width:100%" @bind="_html!.SelectedVertexValues.XString"></input>
+        <br />
+        <label for="yAspect">Y</label>
+        <input id="yAspect" style="width:100%" @bind="_html!.SelectedVertexValues.YString"></input>
+        <br />
+        <label for="yAspect">Угол касательной [-85 : 85]</label>
+        <input id="yAspect" style="width:100%" @bind="_html!.SelectedVertexValues.AngleString"></input>
+        <br />
+
+        <br />
         <hr />
 
         <button @onclick="_html.DownloadResults">Скачать</button>
@@ -71,6 +87,10 @@
 
     public ValueTask<T> InvokeJS<T>(string name, params T[] args) {
         return JsRuntime.InvokeAsync<T>(name, args);
+    }
+
+    public void Refresh() {
+        StateHasChanged();
     }
 
     [JSInvokable]

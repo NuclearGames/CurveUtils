@@ -6,5 +6,6 @@ namespace CurvesWebEditor.Data.CurvesEditor {
         CanvasRender? Render { get; }
 
         ValueTask<T> InvokeJS<T>(string name, params T[] args);
+        void Refresh();
     }
 }

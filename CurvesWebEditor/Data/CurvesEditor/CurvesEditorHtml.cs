@@ -11,6 +11,7 @@ namespace CurvesWebEditor.Data.CurvesEditor {
         private readonly ICurveEditorPage _page;
         internal AxisAspectValues AxisAspects = new AxisAspectValues(1f, 1f);
         internal FlagValue DrawScaledCurve = new FlagValue(false);
+        internal SelectedVertexValues SelectedVertexValues = new SelectedVertexValues(0f, 0f, 45f);
 
         public CurvesEditorHtml(ICurveEditorPage page) {
             _page = page;
@@ -45,6 +46,24 @@ namespace CurvesWebEditor.Data.CurvesEditor {
 
         bool ICurveEditorHtml.DrawScaledCurve => DrawScaledCurve.Value;
 
-#endregion
+        event Action ICurveEditorHtml.onSelectedVertexValuesChanged {
+            add => SelectedVertexValues.onChanged += value;
+            remove => SelectedVertexValues.onChanged -= value;
+        }
+
+        Vector2 ICurveEditorHtml.SelectedVertexPosition {
+            get => SelectedVertexValues.PositionExternal; set {
+                SelectedVertexValues.PositionExternal = value;
+                _page.Refresh();
+            }
+        }
+        float ICurveEditorHtml.SelectedVertexAngle {
+            get => SelectedVertexValues.Angle; set {
+                SelectedVertexValues.Angle = value;
+                _page.Refresh();
+            }
+        }
+
+        #endregion
     }
 }

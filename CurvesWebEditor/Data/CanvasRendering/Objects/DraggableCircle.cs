@@ -6,10 +6,11 @@ using System.Collections.Generic;
 using System.Numerics;
 
 namespace CurvesWebEditor.Data.CanvasRendering.Objects {
-    internal sealed class DraggableCircle : CanvasObject, IDraggable {
+    internal sealed class CurveVertexNode : CanvasObject, IDraggable {
         internal event Action<Vector2>? onDrag;
         internal event Action? onSelectedStateChanged;
 
+        internal CurveVertex Parent { get; }
         internal bool Enabled { get; set; } = true;
         internal Vector2 Position { get; set; }
         internal float Radius { get; set; }
@@ -28,7 +29,8 @@ namespace CurvesWebEditor.Data.CanvasRendering.Objects {
         private readonly CircleRenderer _renderer;
         private bool _selected;
 
-        public DraggableCircle() {
+        public CurveVertexNode(CurveVertex parent) {
+            Parent = parent;
             _collider = new CircleCollider(() => Position, () => Radius);
             _renderer = new CircleRenderer(() => Position, () => Radius, () => Color);
         }

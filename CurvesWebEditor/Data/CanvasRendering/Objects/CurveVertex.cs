@@ -13,15 +13,23 @@ namespace CurvesWebEditor.Data.CanvasRendering.Objects {
         internal event Action? onMove;
         internal event Action? onRotate;
 
-        internal Vector2 Position {get; private set;}
+        internal Vector2 Position { get; private set; }
         internal float RotateRadius { get; private set; } = 0.08f;
-        internal float Angle { get; private set; }
+        internal float Angle {
+            get => _angle; 
+            private set {
+                float angle = MathF.Max(-MAX_ANGLE, value);
+                angle = MathF.Min(MAX_ANGLE, angle);
+                _angle = angle;
+            }
+        }
         internal bool Selected => _center!.Selected || _left!.Selected || _right!.Selected;
 
-        private DraggableCircle? _center;
-        private DraggableCircle? _left;
-        private DraggableCircle? _right;
+        private CurveVertexNode? _center;
+        private CurveVertexNode? _left;
+        private CurveVertexNode? _right;
         private LineRenderer? _lineRenderer;
+        private float _angle;
 
         public CurveVertex(Vector2 position, float angle) {
             Position = position;
@@ -30,9 +38,9 @@ namespace CurvesWebEditor.Data.CanvasRendering.Objects {
 
         protected override void OnInitialize() {
             base.OnInitialize();
-            _center = Create(() => new DraggableCircle() { Radius = 0.025f });
-            _left = Create(() => new DraggableCircle() { Radius = 0.015f });
-            _right = Create(() => new DraggableCircle() { Radius = 0.015f });
+            _center = Create(() => new CurveVertexNode(this) { Radius = 0.025f });
+            _left = Create(() => new CurveVertexNode(this) { Radius = 0.015f });
+            _right = Create(() => new CurveVertexNode(this) { Radius = 0.015f });
             _lineRenderer = new LineRenderer(() => _left.Position, () => _right.Position, () => 0.005f, () => "#02290c");
 
             _center.onDrag += OnDragCenter;
@@ -58,6 +66,11 @@ namespace CurvesWebEditor.Data.CanvasRendering.Objects {
             Position = newPosition;
             _center!.Position = Position;
             SetLeftRightPositions();
+        }
+
+        internal void SetPositionAndAngle(Vector2 newPosition, float angle) {
+            Angle = angle;
+            SetPosition(newPosition);
         }
 
         private void SetLeftRightPositions() {
@@ -93,8 +106,6 @@ namespace CurvesWebEditor.Data.CanvasRendering.Objects {
             var rightPoint = intersection1.X >= 0 ? intersection1 : intersection0;
 
             Angle = MathF.Atan2(rightPoint.Y, rightPoint.X) * MathConstants.Rad2Deg;
-            Angle = MathF.Max(-MAX_ANGLE, Angle);
-            Angle = MathF.Min(MAX_ANGLE, Angle);
 
             SetLeftRightPositions();
             onRotate?.Invoke();

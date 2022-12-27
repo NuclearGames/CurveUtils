@@ -1,39 +1,43 @@
 ﻿using CurvesWebEditor.Data.CanvasRendering.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Numerics;
 
 namespace CurvesWebEditor.Data.CanvasRendering.Managers
 {
     internal sealed class InteractableManager : IInputHandler {
+        internal event Action<IDraggable?>? onSelectedChanged;
+
         internal IDraggable? Pressed {
-            get => pressed;
+            get => _pressed;
             private set {
-                if (pressed != null) {
-                    pressed.Pressed = false;
+                if (_pressed != null) {
+                    _pressed.Pressed = false;
                 }
-                pressed = value;
-                if (pressed != null) {
-                    pressed.Pressed = true;
+                _pressed = value;
+                if (_pressed != null) {
+                    _pressed.Pressed = true;
                 }
             }
         }
 
         internal IDraggable? Selected {
-            get => selected;
+            get => _selected;
             private set {
-                if (selected != null) {
-                    selected.Selected = false;
+                if (_selected != null) {
+                    _selected.Selected = false;
                 }
-                selected = value;
-                if (selected != null) {
-                    selected.Selected = true;
+                _selected = value;
+                if (_selected != null) {
+                    _selected.Selected = true;
                 }
+                onSelectedChanged?.Invoke(_selected);
             }
         }
 
         private readonly HashSet<IDraggable> _interactables = new HashSet<IDraggable>();
-        private IDraggable? pressed;
-        private IDraggable? selected;
+        private IDraggable? _pressed;
+        private IDraggable? _selected;
 
         internal void Add(IDraggable draggable) {
             _interactables.Add(draggable);
