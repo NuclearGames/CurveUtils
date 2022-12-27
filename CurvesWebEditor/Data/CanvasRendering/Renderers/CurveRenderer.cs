@@ -27,6 +27,8 @@ namespace CurvesWebEditor.Data.CanvasRendering.Renderers {
                 return;
             }
 
+            float step = (ToX - FromX) / (1f / Step);
+
             await context.Canvas.BeginPathAsync();
 
             Task Draw(float x, bool first = false) {
@@ -41,12 +43,13 @@ namespace CurvesWebEditor.Data.CanvasRendering.Renderers {
             }
 
             await Draw(FromX, true);
-            for(float x = FromX + Step; x < ToX; x += Step) {
+            for(float x = FromX + step; x < ToX; x += step) {
                 await Draw(x);
             }
             await Draw(ToX);
 
-            float widthSS = context.Transformer.Size(Width);
+            //   float widthSS = context.Transformer.Size(Width);
+            float widthSS = Width * 600f;
             await context.Canvas.SetLineWidthAsync(widthSS);
             await context.Canvas.SetLineCapAsync(LineCap.Round);
             await context.Canvas.SetStrokeStyleAsync(Color);
