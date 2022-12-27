@@ -34,6 +34,33 @@ namespace CurvesWebEditor.Data.CanvasRendering.Tools {
             UpdateCurve();
         }
 
+        internal void CreateCurveFromData(TangentBasedCurveData data) {
+            if(data.Vertexes!.Length < 2) {
+                return;
+            }
+
+            var vertexes = _vertexes.Where(x => x != _leftVertex && x != _rightVertex).ToArray();
+            foreach(var v in vertexes) {
+                TryRemoveVertex(v);
+            }
+
+            for(int i = 0; i < data.Vertexes!.Length; i++) {
+                var position = new Vector2(data.Vertexes[i].PositionX, data.Vertexes[i].PositionY);
+                float angle = MathF.Atan(data.Vertexes[i].Tangent) * MathConstants.Rad2Deg;
+
+                if (i == 0) {
+                    _leftVertex.SetPositionAndAngle(position, angle);
+                } else if(i == data.Vertexes.Length - 1) {
+                    _rightVertex.SetPositionAndAngle(position, angle);
+                } else {
+                    CreateVertex(position, angle);
+                }
+            }
+
+            _context.Html.AxisAspects = new Vector2(data.XAspect, data.YAspect);
+            UpdateCurve();
+        }
+
         internal TangentBasedCurveData CreateData() {
             var vertexes = _vertexes
                 .Where(v => v.Position.X >= 0f && v.Position.X <= 1f)
@@ -90,7 +117,7 @@ namespace CurvesWebEditor.Data.CanvasRendering.Tools {
 
             if (_context.Html.DrawScaledCurve) {
                 var scaledCurve = TangentBasedCurve.FromBasePoints(points, tangentAspects, _context.Html.AxisAspects.X, _context.Html.AxisAspects.Y);
-                _scaledCurveObject.SetCurve(scaledCurve, _leftVertex.Position.X, _rightVertex.Position.Y * _context.Html.AxisAspects.X);
+                _scaledCurveObject.SetCurve(scaledCurve, _leftVertex.Position.X, _rightVertex.Position.X * _context.Html.AxisAspects.X);
             } else {
                 _scaledCurveObject.SetCurve(null, 0f, 0f);
             }

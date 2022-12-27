@@ -1,4 +1,5 @@
 ﻿using Curves;
+using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.JSInterop;
 using System;
 using System.IO;
@@ -17,11 +18,29 @@ namespace CurvesWebEditor.Data.CurvesEditor {
             _page = page;
         }
 
+        internal async Task UploadFile(InputFileChangeEventArgs e) {
+            if (e.FileCount != 1) {
+                return;
+            }
+            foreach (var file in e.GetMultipleFiles(1)) {
+                using var stream = file.OpenReadStream();
+                using var ms = new MemoryStream();
+                await stream.CopyToAsync(ms);
+                CreateCurveFromStream(ms);
+            }
+        }
+
         internal async Task DownloadResults() {
             var stream = GetDownloadStream();
             string filename = "TangentBaseCurve.json";
             var streamRef = new DotNetStreamReference(stream);
-            await _page.InvokeJS<object>("downloadFileFromStream", filename, streamRef);
+            await _page.InvokeJSVoid("downloadFileFromStream", filename, streamRef);
+        }
+
+        private void CreateCurveFromStream(MemoryStream stream) {
+            var json = Encoding.UTF8.GetString(stream.ToArray());
+            var data = TangentBasedCurveData.FromJson(json);
+            _page.Render!.ObjectsContext.CurveEditor.CreateCurveFromData(data);
         }
 
         private Stream GetDownloadStream() {
@@ -37,7 +56,13 @@ namespace CurvesWebEditor.Data.CurvesEditor {
             remove => AxisAspects.onChanged -= value;
         }
 
-        Vector2 ICurveEditorHtml.AxisAspects => AxisAspects.Value;
+        Vector2 ICurveEditorHtml.AxisAspects {
+            get => AxisAspects.Value;
+            set {
+                AxisAspects.Value = value;
+                _page.Refresh();
+            }
+        }
 
         event Action ICurveEditorHtml.onDrawScaledCurveChanged {
             add => DrawScaledCurve.onChanged += value;
@@ -64,6 +89,6 @@ namespace CurvesWebEditor.Data.CurvesEditor {
             }
         }
 
-        #endregion
+#endregion
     }
 }

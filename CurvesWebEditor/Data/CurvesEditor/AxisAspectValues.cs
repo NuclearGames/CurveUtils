@@ -40,7 +40,13 @@ namespace CurvesWebEditor.Data.CurvesEditor {
             }
         }
 
-        internal Vector2 Value => new Vector2(X, Y);
+        internal Vector2 Value {
+            get => new Vector2(X, Y);
+            set {
+                _x = value.X;
+                _y = value.Y;
+            }
+        }
 
         private float _x;
         private float _y;
