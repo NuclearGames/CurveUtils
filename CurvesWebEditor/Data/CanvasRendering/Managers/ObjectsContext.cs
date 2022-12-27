@@ -1,11 +1,13 @@
 ﻿using CurvesWebEditor.Data.CanvasRendering.Interfaces;
 using CurvesWebEditor.Data.CanvasRendering.Objects;
 using CurvesWebEditor.Data.CanvasRendering.Tools;
+using CurvesWebEditor.Data.CurvesEditor;
 using System;
 using System.Collections.Generic;
 
 namespace CurvesWebEditor.Data.CanvasRendering.Managers {
     internal sealed class ObjectsContext : IObjectsContext {
+        internal ICurveEditorHtml Html { get; }
         internal InteractableManager InteractableManager { get; } = new InteractableManager();
         internal RenderersManager RenderersManager { get; }
         internal IReadOnlySet<ICanvasObject> Objects => _objects;
@@ -13,7 +15,8 @@ namespace CurvesWebEditor.Data.CanvasRendering.Managers {
 
         private readonly HashSet<ICanvasObject> _objects = new HashSet<ICanvasObject>();
 
-        public ObjectsContext() {
+        public ObjectsContext(ICurveEditorHtml html) {
+            Html = html;
             Create(() => new BackgroundView());
             RenderersManager = new RenderersManager(this);
             CurveEditor = new CurveEditor(this);

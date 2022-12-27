@@ -1,6 +1,7 @@
 ﻿@page "/curveseditor"
 @layout FullWindowLayout
 @implements IDisposable
+@implements ICurveEditorPage
 
 @using Blazor.Extensions
 @using Blazor.Extensions.Canvas
@@ -24,14 +25,15 @@
         <hr />
         <label>Множители для осей</label>
         <label for="xAspect">Множитель X</label>
-        <input id="xAspect" style="width:100%" @bind="_axisAspects.XString"></input>
+        <input id="xAspect" style="width:100%" @bind="_html!.AxisAspects.XString"></input>
         <br />
         <label for="yAspect">Множитель Y</label>
-        <input id="yAspect" style="width:100%" @bind="_axisAspects.YString"></input>
+        <input id="yAspect" style="width:100%" @bind="_html!.AxisAspects.YString"></input>
         <br />
+        <div><input type="checkbox" id="drawScaled" name="drawScaled" @bind="_html!.DrawScaledCurve.Value"><label for="drawScaled">Отображать отмасштабированную кривую</label></div>
         <hr />
 
-        <button @onclick="DownloadResults">Скачать</button>
+        <button @onclick="_html.DownloadResults">Скачать</button>
     </div>
 </div>
 
@@ -42,25 +44,33 @@
 
 @code {
     private const int LEFT_PANEL_WIDTH = 200;
+    private CurvesEditorHtml? _html; 
     private BECanvasComponent? _canvasReference;
     private Canvas2DContext? _canvasContext;
-    private CanvasRender? _render;
     private float _time = 0f;
     private int _viewportWidth, _viewportHeight;
     private bool _disposed;
 
-    private AxisAspectValues _axisAspects = new AxisAspectValues(1f, 1f);
+    public CanvasRender? Render { get; private set; }
+    private bool HandleJsEvents => !_disposed && Render != null;
 
-    private bool HandleJsEvents => !_disposed && _render != null;
+    protected override void OnInitialized() {
+        base.OnInitialized();
+        _html = new CurvesEditorHtml(this);
+    }
 
     protected async override Task OnAfterRenderAsync(bool firstRender) {
         if(firstRender) {
             _canvasContext = await _canvasReference.CreateCanvas2DAsync();
             await JsRuntime.InvokeAsync<object>("canvasInit", DotNetObjectReference.Create(this));
-            _render = new CanvasRender(_canvasContext, _viewportWidth, _viewportHeight);
+            Render = new CanvasRender(_html!, _canvasContext, _viewportWidth, _viewportHeight);
         }
 
         await base.OnAfterRenderAsync(firstRender);
+    }
+
+    public ValueTask<T> InvokeJS<T>(string name, params T[] args) {
+        return JsRuntime.InvokeAsync<T>(name, args);
     }
 
     [JSInvokable]
@@ -72,8 +82,8 @@
         _viewportWidth = width;
         _viewportHeight = height;
 
-        if (_render != null) {
-            _render.Resize(width, height);
+        if (Render != null) {
+            Render.Resize(width, height);
         }
     }
 
@@ -84,7 +94,7 @@
         }
         float deltaTime = time - _time;
         _time = time;
-        await _render!.Render(deltaTime);
+        await Render!.Render(deltaTime);
     }
 
     [JSInvokable]
@@ -92,7 +102,7 @@
         if (!HandleJsEvents) {
             return;
         }
-        _render!.OnPointerMove(x - LEFT_PANEL_WIDTH, y);
+        Render!.OnPointerMove(x - LEFT_PANEL_WIDTH, y);
     }
 
     [JSInvokable]
@@ -100,7 +110,7 @@
         if (!HandleJsEvents) {
             return;
         }
-        _render!.OnPointerDown(button, shift, alt);
+        Render!.OnPointerDown(button, shift, alt);
     }
 
     [JSInvokable]
@@ -108,7 +118,7 @@
         if (!HandleJsEvents) {
             return;
         }
-        _render!.OnPointerUp(button, shift, alt);
+        Render!.OnPointerUp(button, shift, alt);
     }
 
     [JSInvokable]
@@ -116,26 +126,13 @@
         if (!HandleJsEvents) {
             return;
         }
-        _render!.OnWheel(deltaY, shift, alt);
-    }
-
-    private async Task DownloadResults() {
-        var stream = GetDownloadStream();
-        string filename = "TangentBaseCurve.json";
-        var streamRef = new DotNetStreamReference(stream);
-        await JsRuntime.InvokeAsync<object>("downloadFileFromStream", filename, streamRef);
-    }
-
-    private Stream GetDownloadStream(){
-        var data = _render!.ObjectsContext.CurveEditor.CreateData();
-        var json = TangentBasedCurveData.ToJson(data);
-        return new MemoryStream(Encoding.UTF8.GetBytes(json));
+        Render!.OnWheel(deltaY, shift, alt);
     }
 
     public void Dispose(){
         JsRuntime.InvokeAsync<object>("canvasDispose", DotNetObjectReference.Create(this));
         _canvasContext = null;
-        _render = null;
+        Render = null;
         _disposed = true;
     }
 }

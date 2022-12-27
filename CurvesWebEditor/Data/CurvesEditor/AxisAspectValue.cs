@@ -1,27 +1,51 @@
-﻿namespace CurvesWebEditor.Data.CurvesEditor {
-    public class AxisAspectValues {
-        public string XString {
+﻿using CurvesWebEditor.Data.Utils;
+using System;
+using System.Globalization;
+using System.Numerics;
+
+namespace CurvesWebEditor.Data.CurvesEditor {
+    internal class AxisAspectValues {
+        internal event Action? onChanged;
+
+        internal string XString {
             get => X.ToString();
             set {
-                if(float.TryParse(value, out float f)) {
+                if (float.TryParse(value, NumberStyles.Any, FloatCultureInfo.Value, out float f)) {
                     X = f;
                 }
             }
         }
 
-        public string YString {
+        internal string YString {
             get => Y.ToString();
             set {
-                if (float.TryParse(value, out float f)) {
-                    Y = f;
+                if (float.TryParse(value, NumberStyles.Any, FloatCultureInfo.Value, out float f)) {
+                    Y = f;   
                 }
             }
         }
 
-        public float X { get; set; }
-        public float Y { get; set; }
+        internal float X {
+            get => _x;
+            set {
+                _x = value;
+                onChanged?.Invoke();
+            }
+        }
+        internal float Y {
+            get => _y;
+            set {
+                _y = value;
+                onChanged?.Invoke();
+            }
+        }
 
-        public AxisAspectValues(float x, float y) {
+        internal Vector2 Value => new Vector2(X, Y);
+
+        private float _x;
+        private float _y;
+
+        internal AxisAspectValues(float x, float y) {
             X = x;
             Y = y;
         }

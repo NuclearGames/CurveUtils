@@ -1,5 +1,6 @@
 ﻿using Blazor.Extensions.Canvas.Canvas2D;
 using CurvesWebEditor.Data.CanvasRendering.Managers;
+using CurvesWebEditor.Data.CurvesEditor;
 using System.Numerics;
 using System.Threading.Tasks;
 
@@ -9,22 +10,22 @@ namespace CurvesWebEditor.Data.CanvasRendering {
         internal readonly ObjectsContext ObjectsContext;
         private bool _moveCamera;
 
-        public CanvasRender(Canvas2DContext canvas, int viewportWidth, int viewportHeight) {
+        internal CanvasRender(ICurveEditorHtml html, Canvas2DContext canvas, int viewportWidth, int viewportHeight) {
             RenderContext = new CanvasRenderContext(canvas);
-            ObjectsContext = new ObjectsContext();
+            ObjectsContext = new ObjectsContext(html);
             RenderContext.Viewport.Set(viewportWidth, viewportHeight);
         }
 
-        public void Resize(int viewportWidth, int viewportHeight) {
+        internal void Resize(int viewportWidth, int viewportHeight) {
             RenderContext.Viewport.Set(viewportWidth, viewportHeight);
         }
 
-        public async ValueTask Render(float deltaTime) {
+        internal async ValueTask Render(float deltaTime) {
             RenderContext.Input.Setup();
             await ObjectsContext.RenderersManager.Render(RenderContext);
         }
 
-        public void OnPointerMove(int viewportX, int viewportY) {
+        internal void OnPointerMove(int viewportX, int viewportY) {
             RenderContext.UserInput.SetPointerPositionSS(new Vector2(viewportX, viewportY));
 
             if (_moveCamera) {
@@ -35,7 +36,7 @@ namespace CurvesWebEditor.Data.CanvasRendering {
             ObjectsContext.CurveEditor.OnPointerMove(RenderContext.UserInput.PointerPositionWS);
         }
 
-        public void OnPointerDown(int button, bool shift, bool alt) {
+        internal void OnPointerDown(int button, bool shift, bool alt) {
             switch (button) {
                 case 1:
                     _moveCamera = true;
@@ -46,7 +47,7 @@ namespace CurvesWebEditor.Data.CanvasRendering {
             ObjectsContext.CurveEditor.OnPointerDown(RenderContext, button, shift, alt);
         }
 
-        public void OnPointerUp(int button, bool shift, bool alt) {
+        internal void OnPointerUp(int button, bool shift, bool alt) {
             switch (button) {
                 case 1:
                     _moveCamera = false;
@@ -57,7 +58,7 @@ namespace CurvesWebEditor.Data.CanvasRendering {
             ObjectsContext.CurveEditor.OnPointerUp(RenderContext, button, shift, alt);
         }
 
-        public void OnWheel(float deltaY, bool shift, bool alt) {
+        internal void OnWheel(float deltaY, bool shift, bool alt) {
             float delta = deltaY * 0.0005f;
             float scale = 1 + delta;
 

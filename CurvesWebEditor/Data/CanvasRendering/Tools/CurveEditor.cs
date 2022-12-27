@@ -1,5 +1,6 @@
 ﻿using Curves;
 using CurvesWebEditor.Data.CanvasRendering.Interfaces;
+using CurvesWebEditor.Data.CanvasRendering.Managers;
 using CurvesWebEditor.Data.CanvasRendering.Objects;
 using System;
 using System.Collections.Generic;
@@ -9,20 +10,25 @@ using TransformStructures;
 
 namespace CurvesWebEditor.Data.CanvasRendering.Tools {
     internal sealed class CurveEditor : IInputHandler {
-        private readonly IObjectsContext _context;
+        private readonly ObjectsContext _context;
         private readonly HashSet<CurveVertex> _vertexes = new HashSet<CurveVertex>();
         private readonly CurveVertex _leftVertex;
         private readonly CurveVertex _rightVertex;
-        private float _xAspect, _yAspect;
 
         private readonly CurveView _curveObject;
+        private readonly CurveView _scaledCurveObject;
         private ICurve? _curve;
 
-        internal CurveEditor(IObjectsContext context) {
+        internal CurveEditor(ObjectsContext context) {
             _context = context;
-            _curveObject = _context.Create(() => new CurveView());
+            _scaledCurveObject = _context.Create(() => new CurveView() { Width = 0.01f, Color = "#00eaff" });
+            _curveObject = _context.Create(() => new CurveView() { Width = 0.005f, Color = "#0000FF" });
             _leftVertex = CreateVertex(new Vector2(0f, 0f), 45f);
             _rightVertex = CreateVertex(new Vector2(1f, 1f), 45f);
+
+            _context.Html.onAxisAspectsChanged += UpdateCurve;
+            _context.Html.onDrawScaledCurveChanged += UpdateCurve;
+
             UpdateCurve();
         }
 
@@ -39,8 +45,8 @@ namespace CurvesWebEditor.Data.CanvasRendering.Tools {
 
             return new TangentBasedCurveData() { 
                 Vertexes = vertexes,
-                XAspect = _xAspect,
-                YAspect = _yAspect
+                XAspect = _context.Html.AxisAspects.X,
+                YAspect = _context.Html.AxisAspects.Y
             };
         }
 
@@ -79,6 +85,13 @@ namespace CurvesWebEditor.Data.CanvasRendering.Tools {
 
             _curve = TangentBasedCurve.FromBasePoints(points, tangentAspects);
             _curveObject.SetCurve(_curve, _leftVertex.Position.X, _rightVertex.Position.X);
+
+            if (_context.Html.DrawScaledCurve) {
+                var scaledCurve = TangentBasedCurve.FromBasePoints(points, tangentAspects, _context.Html.AxisAspects.X, _context.Html.AxisAspects.Y);
+                _scaledCurveObject.SetCurve(scaledCurve, _leftVertex.Position.X, _rightVertex.Position.Y * _context.Html.AxisAspects.X);
+            } else {
+                _scaledCurveObject.SetCurve(null, 0f, 0f);
+            }
         }
 
         private void CreateVertexAndUpdate(Vector2 position, float angle) {
