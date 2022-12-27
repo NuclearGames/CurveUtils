@@ -15,45 +15,43 @@
 
 <PageTitle>Curves Editor</PageTitle>
 
-<div style="background-color:orange; border-right:2px; position: fixed; width: 200px; height: 100%;">
-    <div style="position: fixed; width:180px; left:10px;">
-        <NavLink class="nav-link" href="/">
-            <span class="oi oi-list-rich" aria-hidden="true"></span> Выйти
-        </NavLink>
+<div class="curveseditorsidebar">
+    <NavLink class="nav-link" href="/">
+        <span class="oi oi-list-rich" aria-hidden="true"></span> Выйти
+    </NavLink>
 
-        <hr />
-        <label>Множители для осей</label>
-        <label for="xAspect">Множитель X</label>
-        <input id="xAspect" style="width:100%" @bind="_html!.AxisAspects.XString"></input>
-        <br />
-        <label for="yAspect">Множитель Y</label>
-        <input id="yAspect" style="width:100%" @bind="_html!.AxisAspects.YString"></input>
-        <br />
-        <div><input type="checkbox" id="drawScaled" name="drawScaled" @bind="_html!.DrawScaledCurve.Value"><label for="drawScaled">Отображать отмасштабированную</label></div>  
-        
-        <hr />
+    <hr />
+    <label>Множители для осей</label>
+    <label for="xAspect">Множитель X</label>
+    <input id="xAspect" style="width:100%" @bind="_html!.AxisAspects.XString"></input>
+    <br />
+    <label for="yAspect">Множитель Y</label>
+    <input id="yAspect" style="width:100%" @bind="_html!.AxisAspects.YString"></input>
+    <br />
+    <div><input type="checkbox" id="drawScaled" name="drawScaled" @bind="_html!.DrawScaledCurve.Value"><label for="drawScaled">Отображать отмасштабированную</label></div>
 
-        <label>Редактирование выбранной вершины</label>
-        <label for="xAspect">X</label>
-        <input id="xAspect" style="width:100%" @bind="_html!.SelectedVertexValues.XString"></input>
-        <br />
-        <label for="yAspect">Y</label>
-        <input id="yAspect" style="width:100%" @bind="_html!.SelectedVertexValues.YString"></input>
-        <br />
-        <label for="yAspect">Угол касательной [-85 : 85]</label>
-        <input id="yAspect" style="width:100%" @bind="_html!.SelectedVertexValues.AngleString"></input>
-        <hr />
+    <hr />
 
-        <InputFile OnChange="@_html.UploadFile" />
-        <br /><br />
-        <button @onclick="_html.DownloadResults">Скачать</button>
+    <label>Редактирование выбранной вершины</label>
+    <label for="xAspect">X</label>
+    <input id="xAspect" style="width:100%" @bind="_html!.SelectedVertexValues.XString"></input>
+    <br />
+    <label for="yAspect">Y</label>
+    <input id="yAspect" style="width:100%" @bind="_html!.SelectedVertexValues.YString"></input>
+    <br />
+    <label for="yAspect">Угол касательной [-85 : 85]</label>
+    <input id="yAspect" style="width:100%" @bind="_html!.SelectedVertexValues.AngleString"></input>
+    <hr />
 
-        <hr />
-        <p>
-            Колесо - перемещение/масштабирование камеры.<br />
-            Shift + ЛКМ - установить/удалить точку.
-        </p>
-    </div>
+    <InputFile OnChange="@_html.UploadFile" />
+    <br /><br />
+    <button @onclick="_html.DownloadResults">Скачать</button>
+
+    <hr />
+    <p>
+        Колесо - перемещение/масштабирование камеры.<br />
+        Shift + ЛКМ - установить/удалить точку.
+    </p>
 </div>
 
 <div id="canvasViewport" style="background-color:black; position: fixed; width: calc(100% - 200px); height: 100%; left:200px;">

@@ -1,0 +1,11 @@
+﻿div.curveseditorsidebar {
+    overflow-x: hidden;
+    overflow-y: auto;
+    text-align: center;
+    padding: 20px;
+    position: fixed;
+    width: 200px;
+    height: 100%;
+    background-color: orange;
+    border-right: 2px;
+}

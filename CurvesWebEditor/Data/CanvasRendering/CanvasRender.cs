@@ -59,6 +59,10 @@ namespace CurvesWebEditor.Data.CanvasRendering {
         }
 
         internal void OnWheel(float deltaY, bool shift, bool alt) {
+            if(RenderContext.UserInput.PointerPositionSS.X < -1) {
+                return;
+            }
+
             float delta = deltaY * 0.0005f;
             float scale = 1 + delta;
 
