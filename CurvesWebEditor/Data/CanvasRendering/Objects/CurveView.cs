@@ -3,6 +3,7 @@ using CurvesWebEditor.Data.CanvasRendering.Interfaces;
 using CurvesWebEditor.Data.CanvasRendering.Renderers;
 using System.Collections.Generic;
 using System.Numerics;
+using Curves.Interfaces;
 
 namespace CurvesWebEditor.Data.CanvasRendering.Objects {
     internal class CurveView : CanvasObject {

@@ -1,4 +1,4 @@
-﻿namespace Curves {
+﻿namespace Curves.Interfaces {
     /// <summary>
     /// Кривая, представляющая функцию y(x).
     /// </summary>

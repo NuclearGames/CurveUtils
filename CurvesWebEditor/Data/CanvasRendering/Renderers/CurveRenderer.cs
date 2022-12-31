@@ -4,6 +4,7 @@ using CurvesWebEditor.Data.CanvasRendering.Interfaces;
 using System;
 using System.Numerics;
 using System.Threading.Tasks;
+using Curves.Interfaces;
 
 namespace CurvesWebEditor.Data.CanvasRendering.Renderers {
     internal sealed class CurveRenderer : IRenderer {

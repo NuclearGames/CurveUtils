@@ -3,7 +3,7 @@ using System.Numerics;
 using TransformStructures;
 
 namespace TransformStructures_UnitTests {
-    internal class Matrix3x3UnitTests {
+    internal class Matrix3X3UnitTests {
         [Test]
         public void MultiplyMatrixTest() {
             var t = Matrix3x3.Translation(new Vector2(5, 4));

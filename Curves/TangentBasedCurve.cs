@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Numerics;
+using Curves.Interfaces;
 
 namespace Curves {
     /// <summary>
@@ -8,9 +9,9 @@ namespace Curves {
     /// </summary>
     public sealed class TangentBasedCurve : ICurve {
         private readonly Segment[] _sections;
-        private float _xAspect, _yAspect;
+        private readonly float _xAspect, _yAspect;
 
-        internal TangentBasedCurve(Segment[] sections, float xAspect, float yAspect) {
+        private TangentBasedCurve(Segment[] sections, float xAspect, float yAspect) {
             _sections = sections;
             _xAspect = xAspect;
             _yAspect = yAspect;
@@ -23,8 +24,8 @@ namespace Curves {
         private float EvaluateRaw(float x) {
             // Если x правее самого правого сегмента,
             // используем правую сегмент.
-            if (x >= _sections[_sections.Length - 1].RX) {
-                return _sections[_sections.Length - 1].Evaluate(x);
+            if (x >= _sections[^1].RX) {
+                return _sections[^1].Evaluate(x);
             }
 
             // Идем по каждому сегменту и смотрим:
@@ -36,7 +37,7 @@ namespace Curves {
             }
 
             // Этого наступить не должно.
-            throw new ArgumentException();
+            throw new ArgumentException("Invalid 'X' value or segments' settings");
         }
 
         /// <summary>
