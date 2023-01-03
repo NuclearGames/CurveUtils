@@ -10,7 +10,7 @@ on:
       - synchronize
 
 jobs:
-  build:
+  test:
     #if: contains(github.head_ref, 'net6')
     runs-on: ubuntu-latest
     timeout-minutes: 5
