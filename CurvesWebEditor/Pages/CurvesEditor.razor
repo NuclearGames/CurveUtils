@@ -8,12 +8,13 @@
 @using Blazor.Extensions.Canvas.Canvas2D
 @using CurvesWebEditor.Data.CanvasRendering
 @using CurvesWebEditor.Data.CurvesEditor
+@using CurvesWebEditor.Utils.Extensions
 @inject IJSRuntime JsRuntime;
 
 <PageTitle>Curves Editor</PageTitle>
 
 <div class="curveseditorsidebar">
-    <NavLink class="nav-link" href="/">
+    <NavLink class="nav-link" href="@EnvironmentExtensions.BaseUrl.HRef">
         <span class="oi oi-list-rich" aria-hidden="true"></span> Выйти
     </NavLink>
 

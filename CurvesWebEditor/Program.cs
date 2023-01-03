@@ -1,4 +1,5 @@
 using CurvesWebEditor.Data;
+using CurvesWebEditor.Utils.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.DependencyInjection;
@@ -19,7 +20,7 @@ namespace CurvesWebEditor {
             {
                 ForwardedHeaders = ForwardedHeaders.All
             });
-            app.UsePathBase("/070d5db48413446b749557a8d937f38d4b03f40d/warplane-online/curve-editor");
+            app.UsePathBase(EnvironmentExtensions.BaseUrl.Path);
 
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment()) {
