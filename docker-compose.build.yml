@@ -8,9 +8,16 @@ services:
       dockerfile: Dockerfile
     container_name: curve-editor-server
     environment:
-      - BASE_URL=/070d5db48413446b749557a8d937f38d4b03f40d/warplane-online/curve-editor/
+      #- BASE_URL_INFO=/run/secrets/base_url_secret
+      - BASE_URL=/some_base_url
+    secrets:
+      - base_url_secret
     # restart: unless-stopped
     ports:
       - "127.0.0.1:8080:80"
     volumes:
       - ./:/usr/src/app
+
+secrets:
+  base_url_secret:
+    file: ./.secrets/base_url.json

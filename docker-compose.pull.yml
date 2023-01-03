@@ -4,8 +4,17 @@ services:
   curve-editor-server:
     image: dmitryl12345/curve-editor-server:latest
     container_name: curve-editor-server
-    # restart: unless-stopped
+    restart: unless-stopped
+    environment:
+      - BASE_URL_INFO=/run/secrets/base_url_secret 
     ports:
       - "127.0.0.1:3111:80"
     volumes:
       - ./:/usr/src/app
+    secrets:
+      - base_url_secret
+        
+        
+secrets:
+  base_url_secret:
+    file: ./.secrets/base_url.json
