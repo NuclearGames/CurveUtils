@@ -14,6 +14,12 @@ namespace CurvesWebEditor {
             builder.Services.AddServerSideBlazor();
 
             var app = builder.Build();
+            
+            app.UseForwardedHeaders(new ForwardedHeadersOptions
+            {
+                ForwardedHeaders = ForwardedHeaders.All
+            });
+            app.UsePathBase("/070d5db48413446b749557a8d937f38d4b03f40d/warplane-online/curve-editor");
 
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment()) {
@@ -23,16 +29,6 @@ namespace CurvesWebEditor {
             }
 
             // app.UseHttpsRedirection();
-
-            app.UseForwardedHeaders(new ForwardedHeadersOptions
-            {
-                ForwardedHeaders = ForwardedHeaders.All
-            });
-            app.UsePathBase("/070d5db48413446b749557a8d937f38d4b03f40d/warplane-online/curve-editor");
-            
-            // if(!app.Environment.IsDevelopment()) {
-            //     
-            // }
             
             app.UseStaticFiles();
 
