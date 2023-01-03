@@ -6,7 +6,7 @@ services:
     container_name: curve-editor-server
     restart: unless-stopped
     environment:
-      - BASE_URL_INFO:/run/secrets/base_url_secret 
+      - BASE_URL_INFO=/run/secrets/base_url_secret 
     ports:
       - "127.0.0.1:3111:80"
     volumes:
