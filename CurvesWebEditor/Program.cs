@@ -26,12 +26,13 @@ namespace CurvesWebEditor {
 
             app.UseForwardedHeaders(new ForwardedHeadersOptions
             {
-                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+                ForwardedHeaders = ForwardedHeaders.All
             });
+            app.UsePathBase("/070d5db48413446b749557a8d937f38d4b03f40d/warplane-online/curve-editor");
             
-            if(!app.Environment.IsDevelopment()) {
-                app.UsePathBase("/070d5db48413446b749557a8d937f38d4b03f40d/warplane-online/curve-editor");
-            }
+            // if(!app.Environment.IsDevelopment()) {
+            //     
+            // }
             
             app.UseStaticFiles();
 
