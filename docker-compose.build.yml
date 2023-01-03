@@ -7,6 +7,8 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: curve-editor-server
+    environment:
+      - BASE_URL=/070d5db48413446b749557a8d937f38d4b03f40d/warplane-online/curve-editor/
     # restart: unless-stopped
     ports:
       - "127.0.0.1:8080:80"

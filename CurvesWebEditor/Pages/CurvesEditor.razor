@@ -6,11 +6,8 @@
 @using Blazor.Extensions
 @using Blazor.Extensions.Canvas
 @using Blazor.Extensions.Canvas.Canvas2D
-@using Curves
 @using CurvesWebEditor.Data.CanvasRendering
 @using CurvesWebEditor.Data.CurvesEditor
-@using System.IO
-@using System.Text
 @inject IJSRuntime JsRuntime;
 
 <PageTitle>Curves Editor</PageTitle>
@@ -23,10 +20,10 @@
     <hr />
     <label>Множители для осей</label>
     <label for="xAspect">Множитель X</label>
-    <input id="xAspect" style="width:100%" @bind="_html!.AxisAspects.XString"></input>
+    <input id="xAspect" style="width:100%" @bind="_html!.AxisAspects.XString"/>
     <br />
     <label for="yAspect">Множитель Y</label>
-    <input id="yAspect" style="width:100%" @bind="_html!.AxisAspects.YString"></input>
+    <input id="yAspect" style="width:100%" @bind="_html!.AxisAspects.YString"/>
     <br />
     <div><input type="checkbox" id="drawScaled" name="drawScaled" @bind="_html!.DrawScaledCurve.Value"><label for="drawScaled">Отображать отмасштабированную</label></div>
 
@@ -34,13 +31,13 @@
 
     <label>Редактирование выбранной вершины</label>
     <label for="xAspect">X</label>
-    <input id="xAspect" style="width:100%" @bind="_html!.SelectedVertexValues.XString"></input>
+    <input id="xAspect" style="width:100%" @bind="_html!.SelectedVertexValues.XString"/>
     <br />
     <label for="yAspect">Y</label>
-    <input id="yAspect" style="width:100%" @bind="_html!.SelectedVertexValues.YString"></input>
+    <input id="yAspect" style="width:100%" @bind="_html!.SelectedVertexValues.YString"/>
     <br />
     <label for="yAspect">Угол касательной [-85 : 85]</label>
-    <input id="yAspect" style="width:100%" @bind="_html!.SelectedVertexValues.AngleString"></input>
+    <input id="yAspect" style="width:100%" @bind="_html!.SelectedVertexValues.AngleString"/>
     <hr />
 
     <InputFile OnChange="@_html.UploadFile" />
