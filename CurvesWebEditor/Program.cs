@@ -22,7 +22,7 @@ namespace CurvesWebEditor {
                 app.UseHsts();
             }
 
-            app.UseHttpsRedirection();
+            // app.UseHttpsRedirection();
 
             app.UseStaticFiles();
 
