@@ -15,8 +15,6 @@ namespace CurvesWebEditor.Data.CanvasRendering.Tools {
         private readonly CurveView _curveObject;
         private readonly CurveView _scaledCurveObject;
         private ICurve? _curve;
-        private CurveVertex? _selectedVertex;
-        private float? _selectedXLock;
 
         internal CurveEditor(ObjectsContext context) {
             _context = context;
@@ -62,7 +60,6 @@ namespace CurvesWebEditor.Data.CanvasRendering.Tools {
 
         internal TangentBasedCurveData CreateData() {
             var vertexes = _vertexes
-                .Where(v => v.Position.X >= 0f && v.Position.X <= 1f)
                 .OrderBy(v => v.Position.X)
                 .Select(v => new TangentBasedCurveData.CurveVertex() { 
                     PositionX = v.Position.X,
@@ -117,8 +114,6 @@ namespace CurvesWebEditor.Data.CanvasRendering.Tools {
         public void OnPointerUp(CanvasRenderContext context, int button, bool shift, bool alt) { }
 
         private void UpdateCurve() {
-            ClampLeftRightX();
-
             var ordered = _vertexes.OrderBy(x => x.Position.X);
             var points = ordered.Select(x => x.Position).ToArray();
             var tangentAspects = ordered.Select(x => GetTangent(x.Angle)).ToArray();
@@ -134,14 +129,6 @@ namespace CurvesWebEditor.Data.CanvasRendering.Tools {
                 _scaledCurveObject.SetCurve(scaledCurve, minX, maxX * _context.Html.AxisAspects.X);
             } else {
                 _scaledCurveObject.SetCurve(null, 0f, 0f);
-            }
-        }
-
-        private void ClampLeftRightX() {
-            if (_context.Html.LockXAxis) {
-                if (_selectedVertex != null && _selectedXLock != null) {
-                    _selectedVertex.SetPosition(new Vector2(_selectedXLock.Value, _selectedVertex.Position.Y));
-                }
             }
         }
 
@@ -199,11 +186,6 @@ namespace CurvesWebEditor.Data.CanvasRendering.Tools {
 
         private void OnSelectedChanged(IDraggable? obj) {
             if(obj != null && obj is CurveVertexNode node) {
-                _selectedVertex = node.Parent;
-                _selectedXLock = _selectedVertex == _vertexes.MinBy(v => v.Position.X)
-                    ? 0f 
-                    : (_selectedVertex == _vertexes.MaxBy(v => v.Position.X) ? 1f : null);
-
                 UpdateVetrexHtmlView(node.Parent);
             }
         }
