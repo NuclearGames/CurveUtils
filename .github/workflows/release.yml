@@ -1,0 +1,36 @@
+name: Release
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - closed
+      
+jobs:
+  build_and_publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v2
+      with:
+        dotnet-version: 6.0.x
+               
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build
+      run: dotnet build Curves --configuration Release --no-restore --verbosity normal
+    - name: Pack
+      run: dotnet pack Curves --configuration Release --no-build --output .
+
+    - name: Push
+      run: dotnet nuget push ./NuclearGames.Curves.*.nupkg --source https://nuget.pkg.github.com/NuclearGames/index.json --api-key ${GITHUB_TOKEN}
+      
+    env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
