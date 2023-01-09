@@ -5,6 +5,12 @@
     <RootNamespace>Curves</RootNamespace>
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>enable</Nullable>
+  
+    <PackageId>NuclearGames.Curves</PackageId>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/NuclearGames/CurveUtils</RepositoryUrl>
+    <PackageVersion>1.0.0</PackageVersion>
+  
   </PropertyGroup>
 
 </Project>
