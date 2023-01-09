@@ -37,7 +37,7 @@ namespace CurvesWebEditor.Data.CanvasRendering.Tools {
                 return;
             }
 
-            while(_vertexes.Count > 0) {
+            while(_vertexes.Count > 2) {
                 TryRemoveVertex(_vertexes.First());
             }
 
