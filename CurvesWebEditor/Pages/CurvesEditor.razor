@@ -27,7 +27,6 @@
     <input id="yAspect" style="width:100%" @bind="_html!.AxisAspects.YString"/>
     <br />
     <div><input type="checkbox" id="drawScaled" name="drawScaled" @bind="_html!.DrawScaledCurve.Value"><label for="drawScaled">Отображать отмасштабированную</label></div>
-
     <hr />
 
     <label>Редактирование выбранной вершины</label>
@@ -39,6 +38,8 @@
     <br />
     <label for="yAspect">Угол касательной [-85 : 85]</label>
     <input id="yAspect" style="width:100%" @bind="_html!.SelectedVertexValues.AngleString"/>
+    <hr />
+    <button @onclick="InverseVertices">Перевернуть вершины</button>
     <hr />
 
     <InputFile OnChange="@_html.UploadFile" />
@@ -90,6 +91,12 @@
 
     public void Refresh() {
         StateHasChanged();
+    }
+
+    private void InverseVertices() {
+        if (HandleJsEvents) {
+            Render!.ObjectsContext.CurveEditor.InverseVertices();
+        }
     }
 
     [JSInvokable]

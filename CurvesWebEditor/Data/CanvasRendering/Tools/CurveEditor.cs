@@ -12,9 +12,6 @@ namespace CurvesWebEditor.Data.CanvasRendering.Tools {
     internal sealed class CurveEditor : IInputHandler {
         private readonly ObjectsContext _context;
         private readonly HashSet<CurveVertex> _vertexes = new HashSet<CurveVertex>();
-        private readonly CurveVertex _leftVertex;
-        private readonly CurveVertex _rightVertex;
-
         private readonly CurveView _curveObject;
         private readonly CurveView _scaledCurveObject;
         private ICurve? _curve;
@@ -23,13 +20,14 @@ namespace CurvesWebEditor.Data.CanvasRendering.Tools {
             _context = context;
             _scaledCurveObject = _context.Create(() => new CurveView() { Width = 0.01f, Color = "#00eaff" });
             _curveObject = _context.Create(() => new CurveView() { Width = 0.005f, Color = "#0000FF" });
-            _leftVertex = CreateVertex(new Vector2(0f, 0f), 45f);
-            _rightVertex = CreateVertex(new Vector2(1f, 1f), 45f);
+            CreateVertex(new Vector2(0f, 0f), 45f);
+            CreateVertex(new Vector2(1f, 1f), 45f);
 
             _context.Html.onAxisAspectsChanged += UpdateCurve;
             _context.Html.onDrawScaledCurveChanged += UpdateCurve;
             _context.InteractableManager.onSelectedChanged += OnSelectedChanged;
             _context.Html.onSelectedVertexValuesChanged += OnSelectedVertexValuesChanged;
+            _context.Html.onLockXAxisChanged += OnLockXAxisChanged; 
 
             UpdateCurve();
         }
@@ -39,19 +37,18 @@ namespace CurvesWebEditor.Data.CanvasRendering.Tools {
                 return;
             }
 
-            var vertexes = _vertexes.Where(x => x != _leftVertex && x != _rightVertex).ToArray();
-            foreach(var v in vertexes) {
-                TryRemoveVertex(v);
+            while(_vertexes.Count > 2) {
+                TryRemoveVertex(_vertexes.First());
             }
+
+            var fixedVerts = _vertexes.ToArray();
 
             for(int i = 0; i < data.Vertexes!.Length; i++) {
                 var position = new Vector2(data.Vertexes[i].PositionX, data.Vertexes[i].PositionY);
                 float angle = MathF.Atan(data.Vertexes[i].Tangent) * MathConstants.Rad2Deg;
 
-                if (i == 0) {
-                    _leftVertex.SetPositionAndAngle(position, angle);
-                } else if(i == data.Vertexes.Length - 1) {
-                    _rightVertex.SetPositionAndAngle(position, angle);
+                if (i < fixedVerts.Length) {
+                    fixedVerts[i].SetPositionAndAngle(position, angle);
                 } else {
                     CreateVertex(position, angle);
                 }
@@ -63,7 +60,6 @@ namespace CurvesWebEditor.Data.CanvasRendering.Tools {
 
         internal TangentBasedCurveData CreateData() {
             var vertexes = _vertexes
-                .Where(v => v.Position.X >= 0f && v.Position.X <= 1f)
                 .OrderBy(v => v.Position.X)
                 .Select(v => new TangentBasedCurveData.CurveVertex() { 
                     PositionX = v.Position.X,
@@ -77,6 +73,20 @@ namespace CurvesWebEditor.Data.CanvasRendering.Tools {
                 XAspect = _context.Html.AxisAspects.X,
                 YAspect = _context.Html.AxisAspects.Y
             };
+        }
+
+        internal void InverseVertices() {
+            _context.Html.LockXAxis = false;
+            var prevAspects = _context.Html.AxisAspects;
+            _context.Html.AxisAspects = new Vector2(prevAspects.Y, prevAspects.X);
+
+            foreach (var v in _vertexes) {
+                //  float newAngle = 90f - MathF.Abs(v.Angle) * (Math.Sign(v.Angle) == 0 ? 1 : Math.Sign(v.Angle));
+                float newAngle = v.Angle;
+                v.SetPositionAndAngle(new Vector2(v.Position.Y, v.Position.X), newAngle);
+            }
+
+            UpdateCurve();
         }
 
         public void OnPointerDown(CanvasRenderContext context, int button, bool shift, bool alt) {
@@ -104,20 +114,19 @@ namespace CurvesWebEditor.Data.CanvasRendering.Tools {
         public void OnPointerUp(CanvasRenderContext context, int button, bool shift, bool alt) { }
 
         private void UpdateCurve() {
-            // Первый и последний закрепляются на X = 0 и 1.
-            _leftVertex.SetPosition(new Vector2(0f, _leftVertex.Position.Y));
-            _rightVertex.SetPosition(new Vector2(1f, _rightVertex.Position.Y));
-
             var ordered = _vertexes.OrderBy(x => x.Position.X);
             var points = ordered.Select(x => x.Position).ToArray();
             var tangentAspects = ordered.Select(x => GetTangent(x.Angle)).ToArray();
 
+            float minX = _vertexes.Min(v => v.Position.X);
+            float maxX = _vertexes.Max(v => v.Position.X);
+
             _curve = TangentBasedCurve.FromBasePoints(points, tangentAspects);
-            _curveObject.SetCurve(_curve, _leftVertex.Position.X, _rightVertex.Position.X);
+            _curveObject.SetCurve(_curve, minX, maxX);
 
             if (_context.Html.DrawScaledCurve) {
                 var scaledCurve = TangentBasedCurve.FromBasePoints(points, tangentAspects, _context.Html.AxisAspects.X, _context.Html.AxisAspects.Y);
-                _scaledCurveObject.SetCurve(scaledCurve, _leftVertex.Position.X, _rightVertex.Position.X * _context.Html.AxisAspects.X);
+                _scaledCurveObject.SetCurve(scaledCurve, minX, maxX * _context.Html.AxisAspects.X);
             } else {
                 _scaledCurveObject.SetCurve(null, 0f, 0f);
             }
@@ -137,7 +146,7 @@ namespace CurvesWebEditor.Data.CanvasRendering.Tools {
         }
 
         private void TryRemoveVertex(CurveVertex instance) {
-            if(instance == _leftVertex || instance == _rightVertex) {
+            if(_vertexes.Count <= 2) {
                 return;
             }
 
@@ -179,6 +188,10 @@ namespace CurvesWebEditor.Data.CanvasRendering.Tools {
             if(obj != null && obj is CurveVertexNode node) {
                 UpdateVetrexHtmlView(node.Parent);
             }
+        }
+
+        private void OnLockXAxisChanged() {
+            UpdateCurve();
         }
     }
 }
