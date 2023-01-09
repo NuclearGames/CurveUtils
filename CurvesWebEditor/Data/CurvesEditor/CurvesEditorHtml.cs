@@ -13,6 +13,7 @@ namespace CurvesWebEditor.Data.CurvesEditor {
         internal AxisAspectValues AxisAspects = new AxisAspectValues(1f, 1f);
         internal FlagValue DrawScaledCurve = new FlagValue(false);
         internal SelectedVertexValues SelectedVertexValues = new SelectedVertexValues(0f, 0f, 45f);
+        internal FlagValue LockXAxis = new FlagValue(true);
 
         public CurvesEditorHtml(ICurveEditorPage page) {
             _page = page;
@@ -76,18 +77,33 @@ namespace CurvesWebEditor.Data.CurvesEditor {
             remove => SelectedVertexValues.onChanged -= value;
         }
 
+        event Action ICurveEditorHtml.onLockXAxisChanged {
+            add => LockXAxis.onChanged += value;
+            remove => LockXAxis.onChanged -= value;
+        }
+
         Vector2 ICurveEditorHtml.SelectedVertexPosition {
-            get => SelectedVertexValues.PositionExternal; set {
+            get => SelectedVertexValues.PositionExternal; 
+            set {
                 SelectedVertexValues.PositionExternal = value;
                 _page.Refresh();
             }
         }
         float ICurveEditorHtml.SelectedVertexAngle {
-            get => SelectedVertexValues.Angle; set {
+            get => SelectedVertexValues.Angle; 
+            set {
                 SelectedVertexValues.Angle = value;
                 _page.Refresh();
             }
         }
+
+        bool ICurveEditorHtml.LockXAxis { 
+            get => LockXAxis.Value; 
+            set {
+                LockXAxis.Value = value;
+                _page.Refresh();
+            }
+       }
 
 #endregion
     }
